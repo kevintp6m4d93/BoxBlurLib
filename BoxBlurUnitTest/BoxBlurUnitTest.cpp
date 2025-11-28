@@ -16,7 +16,7 @@ namespace BoxBlurUnitTest
             std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/test_image.jpg";
             cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
 
-            Assert::IsFalse(src.empty(), L"Failed to load test image (C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/test_image.jpg)");
+            Assert::IsFalse(src.empty(), L"Failed to load test image");
 
             int width = src.cols;
             int height = src.rows;

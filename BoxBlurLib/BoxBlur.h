@@ -16,9 +16,7 @@ namespace Blur {
 		void Apply(const uint8_t *srcBuffer, uint8_t *dstBuffer, int width, int height, int numChannels, int kernelSize);
 	private:
 		PaddingMode paddingMode_;
-		void computeOnePixel(int x, int y, const uint8_t* srcBuffer, uint8_t* dstBuffer, int width, int height, int numChannels, int kernelSize);
-		void getPixelAt(int x, int y, const uint8_t* srcBuffer, int width, int height, int numChannels, uint8_t* outPixel);
+		void blurOnePixel(int x, int y, const uint8_t* srcBuffer, uint8_t* dstBuffer, int width, int height, int numChannels, int kernelSize);
+		void getSrcPixelValue(int x, int y, const uint8_t* srcBuffer, int width, int height, int numChannels, uint8_t* outPixel);
 	};
 }
-
-#pragma once

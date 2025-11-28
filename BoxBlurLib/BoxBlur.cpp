@@ -8,12 +8,12 @@ namespace Blur {
 	void BoxBlur::Apply(const uint8_t *srcBuffer, uint8_t *dstBuffer, int width, int height, int numChannels, int kernelSize) {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				computeOnePixel(x, y, srcBuffer, dstBuffer, width, height, numChannels, kernelSize);
+				blurOnePixel(x, y, srcBuffer, dstBuffer, width, height, numChannels, kernelSize);
 			}
 		}
 	}
 
-	void BoxBlur::computeOnePixel(int x, int y, const uint8_t* srcBuffer, uint8_t* dstBuffer, int width, int height, int numChannels, int kernelSize) {
+	void BoxBlur::blurOnePixel(int x, int y, const uint8_t* srcBuffer, uint8_t* dstBuffer, int width, int height, int numChannels, int kernelSize) {
 		std::array<float, 4> accPixels = { 0.0f, 0.0f, 0.0f, 0.0f };
 		int halfKernel = kernelSize / 2;
 		int rowSize = numChannels * width;
@@ -22,7 +22,7 @@ namespace Blur {
 				int sample_x = x + kernel_x;
 				int sample_y = y + kernel_y;
 				uint8_t samplePixel[4] = { 0, 0, 0, 0 };
-				getPixelAt(sample_x, sample_y, srcBuffer, width, height, numChannels, samplePixel);
+				getSrcPixelValue(sample_x, sample_y, srcBuffer, width, height, numChannels, samplePixel);
 				for (int c = 0; c < numChannels; c++) {
 					accPixels[c] += samplePixel[c];
 				}
@@ -35,7 +35,7 @@ namespace Blur {
 		}
 	}
 
-	void BoxBlur::getPixelAt(int x, int y, const uint8_t* srcBuffer, int width, int height, int numChannels, uint8_t* outPixel) {
+	void BoxBlur::getSrcPixelValue(int x, int y, const uint8_t* srcBuffer, int width, int height, int numChannels, uint8_t* outPixel) {
 		int clampedX = x;
 		int clampedY = y;
 		switch (paddingMode_) {
