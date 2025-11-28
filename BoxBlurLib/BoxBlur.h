@@ -2,8 +2,12 @@
 #pragma once
 #include <cstdint>
 
-namespace Blur {
+namespace ImageCore {
+	enum class PixelFormat;
+	class ImageBuffer;
+}
 
+namespace Blur {
 	enum class PaddingMode {
 		Zeros,
 		Replicate,
@@ -13,10 +17,10 @@ namespace Blur {
 	class BoxBlur {
 	public:
 		BoxBlur(PaddingMode paddingMode);
-		void Apply(const uint8_t *srcBuffer, uint8_t *dstBuffer, int width, int height, int numChannels, int kernelSize);
+		void Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
 	private:
 		PaddingMode paddingMode_;
-		void blurOnePixel(int x, int y, const uint8_t* srcBuffer, uint8_t* dstBuffer, int width, int height, int numChannels, int kernelSize);
-		void getSrcPixelValue(int x, int y, const uint8_t* srcBuffer, int width, int height, int numChannels, uint8_t* outPixel);
+		void blurOnePixel(int x, int y, const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
+		void samplePixelWithBoundary(int x, int y, const ImageCore::ImageBuffer& buffer, uint8_t* outPixel);
 	};
 }

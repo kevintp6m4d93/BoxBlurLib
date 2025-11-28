@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "BoxBlur.h"
+#include "ImageBuffer.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
 
@@ -21,33 +22,33 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
             int numChannel = src.channels();
-            int kernelSize = 5;
+            int kernelSize = 11;
+			ImageCore::ImageBuffer srcBuffer(src);
+            ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
-            cv::Mat dstBox(src.size(), src.type());
+            Blur::BoxBlur boxBlur(Blur::PaddingMode::Mirror);
+            boxBlur.Apply(srcBuffer, dstBuffer, kernelSize);
 
-            Blur::BoxBlur boxBlur(Blur::PaddingMode::Replicate);
-
-            boxBlur.Apply(src.data,
-                dstBox.data,
+            cv::Mat dstMat(height,
                 width,
-                height,
-                numChannel,
-                kernelSize);
+                dstBuffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4,
+                dstBuffer.GetBufferPtr(),
+                dstBuffer.GetStride());
 
-            cv::Mat dstRef;
+            cv::Mat gtMat;
             cv::blur(src,
-                dstRef,
+                gtMat,
                 cv::Size(kernelSize, kernelSize),
                 cv::Point(-1, -1),
-                cv::BORDER_REPLICATE);
+                cv::BORDER_REFLECT);
 
-            Assert::AreEqual(dstRef.rows, dstBox.rows);
-            Assert::AreEqual(dstRef.cols, dstBox.cols);
-            Assert::AreEqual(dstRef.channels(), dstBox.channels());
+            Assert::AreEqual(gtMat.rows, dstMat.rows);
+            Assert::AreEqual(gtMat.cols, dstMat.cols);
+            Assert::AreEqual(gtMat.channels(), dstMat.channels());
 
             const int total = width * height * numChannel;
-            const uint8_t* pRef = dstRef.data;
-            const uint8_t* pBox = dstBox.data;
+            const uint8_t* pRef = gtMat.data;
+            const uint8_t* pBox = dstMat.data;
 
             for (int i = 0; i < total; ++i)
             {
@@ -63,7 +64,7 @@ namespace BoxBlurUnitTest
                 ? imageName + "_blurred.jpg"
                 : imageName.substr(0, dotPos) + "_blurred.jpg";
 
-            cv::imwrite(outName, dstBox);
+            cv::imwrite(outName, dstMat);
         }
     };
 }
