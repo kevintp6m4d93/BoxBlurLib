@@ -47,12 +47,12 @@ namespace BoxBlurUnitTest
             Assert::AreEqual(gtMat.channels(), dstMat.channels());
 
             const int total = width * height * numChannel;
-            const uint8_t* pRef = gtMat.data;
-            const uint8_t* pBox = dstMat.data;
+            const uint8_t* gtMatData = gtMat.data;
+            const uint8_t* dstMatData = dstMat.data;
 
             for (int i = 0; i < total; ++i)
             {
-                int diff = std::abs(int(pRef[i]) - int(pBox[i]));
+                int diff = std::abs(int(gtMatData[i]) - int(dstMatData[i]));
                 Assert::IsTrue(
                     diff <= 1,
                     (L"Pixel difference too large at index " + std::to_wstring(i)).c_str()

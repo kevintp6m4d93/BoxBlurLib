@@ -7,6 +7,7 @@ namespace Blur {
 	BoxBlur::BoxBlur(PaddingMode paddingMode) : paddingMode_(paddingMode) {}
 
 	void BoxBlur::Apply(const ImageCore::ImageBuffer &srcBuffer, ImageCore::ImageBuffer &dstBuffer, int kernelSize) {
+		// Null ptr check
 		assert(kernelSize % 2 == 1 && kernelSize >= 1, "Kernel size must be a positive odd integer.");
 		int src_height = srcBuffer.GetHeight();
 		int src_width = srcBuffer.GetWidth();
@@ -39,20 +40,20 @@ namespace Blur {
 		}
 		dstBuffer.SetPixelValue(x, y, avgPixel, srcBuffer.GetPixelFormat());
 	}
-
+	// Return value: what information AP should know
 	void BoxBlur::samplePixelWithBoundary(int x, int y, const ImageCore::ImageBuffer& buffer, uint8_t* outPixel) {
 		int clampedX = x;
 		int clampedY = y;
 		int width = buffer.GetWidth();
 		int height = buffer.GetHeight();
 		int numChannels = buffer.GetNumChannels();
-		switch (paddingMode_) {
+		switch (paddingMode_) {	// No need to handle padding
 		case PaddingMode::Zeros:
 			if (x < 0 || x >= width || y < 0 || y >= height) {
 				for (int c = 0; c < numChannels; c++) {
 					outPixel[c] = 0;
 				}
-				return;
+				return;	//Dont early return, 1 function 1 return
 			}
 			break;
 		case PaddingMode::Replicate:

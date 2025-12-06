@@ -1,4 +1,3 @@
-// BoxBlur.h
 #pragma once
 #include <cstdint>
 
