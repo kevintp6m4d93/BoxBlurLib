@@ -117,8 +117,7 @@ namespace ImageCore {
 			throw std::out_of_range("Pixel coordinates are out of bounds");
         }
 
-        int rowSize = num_channels * width;
-        int bufferIndex = y * rowSize + x * num_channels;
+        int bufferIndex = y * stride + x * num_channels;
         for (int c = 0; c < num_channels; c++) {
             outPixel[c] = data.get()[bufferIndex + c];
         }

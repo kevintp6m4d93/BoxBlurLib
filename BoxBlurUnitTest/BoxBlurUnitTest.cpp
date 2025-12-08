@@ -22,7 +22,7 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
             int numChannel = src.channels();
-            int kernelSize = 11;
+            int kernelSize = 21;
 			ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
