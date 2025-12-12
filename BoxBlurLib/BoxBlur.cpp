@@ -1,4 +1,4 @@
-#include "BoxBlur.h"
+ï»¿#include "BoxBlur.h"
 #include "ImageBuffer.h"
 #include <array>
 #include <vector>
@@ -98,7 +98,7 @@ namespace Blur {
         for (int c = 0; c < numChannels; c++) {
             avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
         }
-        // TODO: ¤§«á§âÂà´«color®æ¦¡ªº³¡¤À®³±¼¡A³oÃä´N¤£¥Î¶Çsrcªº®æ¦¡¤F
+        // TODO: ä¹‹å¾ŒæŠŠè½‰æ›coloræ ¼å¼çš„éƒ¨åˆ†æ‹¿æ‰ï¼Œé€™é‚Šå°±ä¸ç”¨å‚³srcçš„æ ¼å¼äº†
         dstBuffer.SetPixelValue(col_index, 0, avgPixel, dstBuffer.GetPixelFormat());
 
         for (int y = 1; y < height; y++) {
@@ -192,7 +192,9 @@ namespace Blur {
         std::vector<HRESULT> taskResults(numThreads_);
         std::vector<pthread_cond_t> taskEvents(numThreads_);
         std::vector<pthread_mutex_t> taskMutexes(numThreads_);
+        std::vector<int> taskCompleted(numThreads_, 0);
 		std::vector<rowMultiThreadData> rowTaskDataList(numThreads_);
+        
         for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
 			rowTaskDataList[threadIdx].pThis = this;
 			rowTaskDataList[threadIdx].srcBuffer = &srcBuffer;
@@ -202,6 +204,9 @@ namespace Blur {
             rowTaskDataList[threadIdx].kernelSize = kernelSize;
 			pthread_cond_init(&taskEvents[threadIdx], nullptr);
 			pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
+			rowTaskDataList[threadIdx].pCompleted = &taskCompleted[threadIdx];
+			rowTaskDataList[threadIdx].pMutex = &taskMutexes[threadIdx];
+            
             threadPool_->AssignTask(
                 BoxBlur::rowMultiThreadWraper,
                 static_cast<void*>(&(rowTaskDataList[threadIdx])),
@@ -210,10 +215,21 @@ namespace Blur {
                 &taskMutexes[threadIdx]
 			);
         }
+        
 		for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
 			pthread_mutex_lock(&taskMutexes[threadIdx]);
-			pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
+            while (!taskCompleted[threadIdx]) {
+			    pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
+            }
 			pthread_mutex_unlock(&taskMutexes[threadIdx]);
+        }
+
+        for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+            pthread_cond_destroy(&taskEvents[threadIdx]);
+            pthread_mutex_destroy(&taskMutexes[threadIdx]);
+            pthread_cond_init(&taskEvents[threadIdx], nullptr);
+            pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
+            taskCompleted[threadIdx] = 0;
         }
 
         std::vector<colMultiThreadData> colTaskDataList(numThreads_);
@@ -224,7 +240,9 @@ namespace Blur {
             colTaskDataList[threadIdx].start_col_index = threadIdx * numColsPerThread;
             colTaskDataList[threadIdx].end_col_index = (threadIdx == numThreads_ - 1) ? src_width : (threadIdx + 1) * numColsPerThread;
             colTaskDataList[threadIdx].kernelSize = kernelSize;
-
+            colTaskDataList[threadIdx].pCompleted = &taskCompleted[threadIdx];
+            colTaskDataList[threadIdx].pMutex = &taskMutexes[threadIdx];
+            
             threadPool_->AssignTask(
                 BoxBlur::colMultiThreadWraper,
                 static_cast<void*>(&(colTaskDataList[threadIdx])),
@@ -233,9 +251,12 @@ namespace Blur {
                 &taskMutexes[threadIdx]
             );
         }
+        
         for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
             pthread_mutex_lock(&taskMutexes[threadIdx]);
-            pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
+            while (!taskCompleted[threadIdx]) {
+                pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
+            }
             pthread_mutex_unlock(&taskMutexes[threadIdx]);
 
 			pthread_cond_destroy(&taskEvents[threadIdx]);
@@ -248,6 +269,10 @@ namespace Blur {
         for (int row = data->start_row_index; row < data->end_row_index; ++row) {
 			data->pThis->blurSingleRow(*(data->srcBuffer), data->tmpBuffer, row, data->kernelSize);
         }
+        
+        pthread_mutex_lock(data->pMutex);
+        *(data->pCompleted) = 1;
+        pthread_mutex_unlock(data->pMutex);
     }
 
     void BoxBlur::colMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
@@ -255,5 +280,9 @@ namespace Blur {
         for (int col = data->start_col_index; col < data->end_col_index; col++) {
 			data->pThis->blurSingleCol(data->tmpBuffer, *(data->dstBuffer), col, data->kernelSize);
         }
+        
+        pthread_mutex_lock(data->pMutex);
+        *(data->pCompleted) = 1;
+        pthread_mutex_unlock(data->pMutex);
     }
 }

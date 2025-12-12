@@ -43,6 +43,8 @@ namespace Blur {
 			int start_row_index;
 			int end_row_index;
 			int kernelSize;
+			int* pCompleted;
+			pthread_mutex_t* pMutex;
 		};
 		struct colMultiThreadData {
 			BoxBlur* pThis;
@@ -51,6 +53,8 @@ namespace Blur {
 			int start_col_index;
 			int end_col_index;
 			int kernelSize;
+			int* pCompleted;
+			pthread_mutex_t* pMutex;
 		};
 	};
 }
