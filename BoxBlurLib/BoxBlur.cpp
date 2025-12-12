@@ -1,15 +1,26 @@
 #include "BoxBlur.h"
 #include "ImageBuffer.h"
 #include <array>
+#include <vector>
 #include <cassert>
 
 namespace Blur {
-    BoxBlur::BoxBlur(PaddingMode paddingMode) : paddingMode_(paddingMode) {}
+    BoxBlur::BoxBlur(PaddingMode paddingMode, int numThreads) : paddingMode_(paddingMode), numThreads_(numThreads) {
+        if (numThreads_ > 0) {
+            threadPool_ = std::make_unique<CThreadPool>();
+            threadPool_->Initialize(numThreads_);
+        }
+    }
 
     void BoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
         // TODO: Null ptr check
-        assert(kernelSize % 2 == 1 && kernelSize >= 1, "Kernel size must be a positive odd integer.");
-        fastApply(srcBuffer, dstBuffer, kernelSize);
+        assert(kernelSize % 2 == 1 && kernelSize >= 1);
+        if (numThreads_ > 0) {
+            fastApplyMultiThread(srcBuffer, dstBuffer, kernelSize);
+		}
+        else {
+            fastApply(srcBuffer, dstBuffer, kernelSize);
+        }
     }
 
     void BoxBlur::naiveApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
@@ -164,5 +175,85 @@ namespace Blur {
         clampedY = clampCoordinate(y, height);
 
         buffer.GetPixelValue(clampedX, clampedY, outPixel);
+    }
+
+    void BoxBlur::fastApplyMultiThread(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
+        int src_height = srcBuffer.GetHeight();
+        int src_width = srcBuffer.GetWidth();
+        int src_stride = srcBuffer.GetStride();
+
+		int numRowsPerThread = src_height / numThreads_;
+		int numColsPerThread = src_width / numThreads_;
+
+        std::shared_ptr<float> tmpBuffer(
+            new float[src_stride * src_height],
+            std::default_delete<float[]>()
+        );
+        std::vector<HRESULT> taskResults(numThreads_);
+        std::vector<pthread_cond_t> taskEvents(numThreads_);
+        std::vector<pthread_mutex_t> taskMutexes(numThreads_);
+		std::vector<rowMultiThreadData> rowTaskDataList(numThreads_);
+        for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+			rowTaskDataList[threadIdx].pThis = this;
+			rowTaskDataList[threadIdx].srcBuffer = &srcBuffer;
+			rowTaskDataList[threadIdx].tmpBuffer = tmpBuffer;
+			rowTaskDataList[threadIdx].start_row_index = threadIdx * numRowsPerThread;
+			rowTaskDataList[threadIdx].end_row_index = (threadIdx == numThreads_ - 1) ? src_height : (threadIdx + 1) * numRowsPerThread;
+            rowTaskDataList[threadIdx].kernelSize = kernelSize;
+			pthread_cond_init(&taskEvents[threadIdx], nullptr);
+			pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
+            threadPool_->AssignTask(
+                BoxBlur::rowMultiThreadWraper,
+                static_cast<void*>(&(rowTaskDataList[threadIdx])),
+                &taskResults[threadIdx],
+                &taskEvents[threadIdx],
+                &taskMutexes[threadIdx]
+			);
+        }
+		for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+			pthread_mutex_lock(&taskMutexes[threadIdx]);
+			pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
+			pthread_mutex_unlock(&taskMutexes[threadIdx]);
+        }
+
+        std::vector<colMultiThreadData> colTaskDataList(numThreads_);
+        for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+            colTaskDataList[threadIdx].pThis = this;
+            colTaskDataList[threadIdx].tmpBuffer = tmpBuffer;
+            colTaskDataList[threadIdx].dstBuffer = &dstBuffer;
+            colTaskDataList[threadIdx].start_col_index = threadIdx * numColsPerThread;
+            colTaskDataList[threadIdx].end_col_index = (threadIdx == numThreads_ - 1) ? src_width : (threadIdx + 1) * numColsPerThread;
+            colTaskDataList[threadIdx].kernelSize = kernelSize;
+
+            threadPool_->AssignTask(
+                BoxBlur::colMultiThreadWraper,
+                static_cast<void*>(&(colTaskDataList[threadIdx])),
+                &taskResults[threadIdx],
+                &taskEvents[threadIdx],
+                &taskMutexes[threadIdx]
+            );
+        }
+        for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+            pthread_mutex_lock(&taskMutexes[threadIdx]);
+            pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
+            pthread_mutex_unlock(&taskMutexes[threadIdx]);
+
+			pthread_cond_destroy(&taskEvents[threadIdx]);
+			pthread_mutex_destroy(&taskMutexes[threadIdx]);
+        }
+    }
+
+    void BoxBlur::rowMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
+		rowMultiThreadData* data = static_cast<rowMultiThreadData*>(pFunctionParam);
+        for (int row = data->start_row_index; row < data->end_row_index; ++row) {
+			data->pThis->blurSingleRow(*(data->srcBuffer), data->tmpBuffer, row, data->kernelSize);
+        }
+    }
+
+    void BoxBlur::colMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
+		colMultiThreadData* data = static_cast<colMultiThreadData*>(pFunctionParam);
+        for (int col = data->start_col_index; col < data->end_col_index; col++) {
+			data->pThis->blurSingleCol(data->tmpBuffer, *(data->dstBuffer), col, data->kernelSize);
+        }
     }
 }
