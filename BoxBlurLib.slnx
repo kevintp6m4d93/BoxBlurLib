@@ -1,5 +1,10 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="Release_MultiThreadsOptimized" />
+    <BuildType Name="Release_Naive" />
+    <BuildType Name="Release_Optimized" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>

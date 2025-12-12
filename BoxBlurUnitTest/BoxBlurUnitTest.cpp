@@ -4,6 +4,7 @@
 #include "ImageBuffer.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
+#include <chrono>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -26,8 +27,15 @@ namespace BoxBlurUnitTest
 			ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
-            Blur::BoxBlur boxBlur(Blur::PaddingMode::Mirror, 16);
+            Blur::BoxBlur boxBlur(Blur::PaddingMode::Mirror, 4);
+            
+            auto start = std::chrono::high_resolution_clock::now();
             boxBlur.Apply(srcBuffer, dstBuffer, kernelSize);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+            
+            std::wstring timeMessage = L"BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
+            Logger::WriteMessage(timeMessage.c_str());
 
             cv::Mat dstMat(height,
                 width,

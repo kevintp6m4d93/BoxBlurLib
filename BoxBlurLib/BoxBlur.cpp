@@ -6,21 +6,34 @@
 
 namespace Blur {
     BoxBlur::BoxBlur(PaddingMode paddingMode, int numThreads) : paddingMode_(paddingMode), numThreads_(numThreads) {
+#if USE_MULTI_THREAD
         if (numThreads_ > 0) {
             threadPool_ = std::make_unique<CThreadPool>();
             threadPool_->Initialize(numThreads_);
         }
+#endif
     }
 
     void BoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
         // TODO: Null ptr check
         assert(kernelSize % 2 == 1 && kernelSize >= 1);
+        
+#if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
         if (numThreads_ > 0) {
             fastApplyMultiThread(srcBuffer, dstBuffer, kernelSize);
-		}
-        else {
-            fastApply(srcBuffer, dstBuffer, kernelSize);
         }
+        else {
+#if USE_DYNAMIC_PROGRAMMING
+            fastApply(srcBuffer, dstBuffer, kernelSize);
+#else
+            naiveApply(srcBuffer, dstBuffer, kernelSize);
+#endif
+        }
+#elif USE_DYNAMIC_PROGRAMMING
+        fastApply(srcBuffer, dstBuffer, kernelSize);
+#else
+        naiveApply(srcBuffer, dstBuffer, kernelSize);
+#endif
     }
 
     void BoxBlur::naiveApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
@@ -56,6 +69,7 @@ namespace Blur {
         dstBuffer.SetPixelValue(x, y, avgPixel, srcBuffer.GetPixelFormat());
     }
 
+#if USE_DYNAMIC_PROGRAMMING
     void BoxBlur::fastApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
         int src_height = srcBuffer.GetHeight();
         int src_width = srcBuffer.GetWidth();
@@ -148,6 +162,7 @@ namespace Blur {
             }
         }
     }
+#endif
 
     int BoxBlur::clampCoordinate(int coord, int maxCoord) const {
         int clampedCoordinate = coord;
@@ -177,6 +192,7 @@ namespace Blur {
         buffer.GetPixelValue(clampedX, clampedY, outPixel);
     }
 
+#if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
     void BoxBlur::fastApplyMultiThread(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
         int src_height = srcBuffer.GetHeight();
         int src_width = srcBuffer.GetWidth();
@@ -285,4 +301,5 @@ namespace Blur {
         *(data->pCompleted) = 1;
         pthread_mutex_unlock(data->pMutex);
     }
+#endif
 }
