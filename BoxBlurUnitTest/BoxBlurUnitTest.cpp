@@ -25,7 +25,7 @@ namespace BoxBlurUnitTest
             int numChannel = src.channels();
             int kernelSize = 51;
 			ImageCore::ImageBuffer srcBuffer(src);
-            ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::RGB);
+            ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
             Blur::BoxBlur boxBlur(Blur::PaddingMode::Mirror, 4);
             
