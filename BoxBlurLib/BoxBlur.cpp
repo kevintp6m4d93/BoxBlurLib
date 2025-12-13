@@ -17,6 +17,7 @@ namespace Blur {
     void BoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
         // TODO: Null ptr check
         assert(kernelSize % 2 == 1 && kernelSize >= 1);
+		assert(srcBuffer.GetPixelFormat() == dstBuffer.GetPixelFormat());
         
 #if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
         if (numThreads_ > 0) {
@@ -66,7 +67,7 @@ namespace Blur {
         for (int c = 0; c < numSrcChannels; c++) {
             avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
         }
-        dstBuffer.SetPixelValue(x, y, avgPixel, srcBuffer.GetPixelFormat());
+        dstBuffer.SetPixelValue(x, y, avgPixel);
     }
 
 #if USE_DYNAMIC_PROGRAMMING
@@ -112,8 +113,7 @@ namespace Blur {
         for (int c = 0; c < numChannels; c++) {
             avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
         }
-        // TODO: 之後把轉換color格式的部分拿掉，這邊就不用傳src的格式了
-        dstBuffer.SetPixelValue(col_index, 0, avgPixel, dstBuffer.GetPixelFormat());
+        dstBuffer.SetPixelValue(col_index, 0, avgPixel);
 
         for (int y = 1; y < height; y++) {
             int prev_y = y - halfKernel - 1;

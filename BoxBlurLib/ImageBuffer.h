@@ -30,7 +30,7 @@ namespace ImageCore {
 		uint8_t* GetBufferPtr() const { return data.get(); }
 		void GetPixelValue(int x, int y, uint8_t* outPixel) const;
 
-		void SetPixelValue(int x, int y, const uint8_t* srcPixel, PixelFormat srcPixelFmt);
+		void SetPixelValue(int x, int y, const uint8_t* srcPixel);
 
 	private:
 		int width;

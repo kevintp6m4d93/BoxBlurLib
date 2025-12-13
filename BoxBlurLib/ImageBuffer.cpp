@@ -48,68 +48,16 @@ namespace ImageCore {
 		);
 	}
 
-    void ImageBuffer::SetPixelValue(int x, int y, const uint8_t* srcPixel, PixelFormat srcPixelFmt) {
+    void ImageBuffer::SetPixelValue(int x, int y, const uint8_t* srcPixel) {
         if (x < 0 || x >= width || y < 0 || y >= height) {
             throw std::out_of_range("Pixel coordinates are out of bounds");
         }
 
-        uint8_t rgba[4] = { 0, 0, 0, 255 };
-
-        switch (srcPixelFmt) {
-        case PixelFormat::RGB:
-            rgba[0] = srcPixel[0];
-            rgba[1] = srcPixel[1];
-            rgba[2] = srcPixel[2];
-            break;
-        case PixelFormat::BGR:
-            rgba[0] = srcPixel[2];
-            rgba[1] = srcPixel[1];
-            rgba[2] = srcPixel[0];
-            break;
-        case PixelFormat::RGBA:
-            rgba[0] = srcPixel[0];
-            rgba[1] = srcPixel[1];
-            rgba[2] = srcPixel[2];
-            rgba[3] = srcPixel[3];
-            break;
-        case PixelFormat::BGRA:
-            rgba[0] = srcPixel[2];
-            rgba[1] = srcPixel[1];
-            rgba[2] = srcPixel[0];
-            rgba[3] = srcPixel[3];
-            break;
-        }
-
         uint8_t* dst = data.get();
         int idx = y * stride + x * num_channels;
-
-        switch (pixel_format) {
-        case PixelFormat::RGB:
-            dst[idx + 0] = rgba[0];
-            dst[idx + 1] = rgba[1];
-            dst[idx + 2] = rgba[2];
-            break;
-
-        case PixelFormat::BGR:
-            dst[idx + 0] = rgba[2];
-            dst[idx + 1] = rgba[1];
-            dst[idx + 2] = rgba[0];
-            break;
-
-        case PixelFormat::RGBA:
-            dst[idx + 0] = rgba[0];
-            dst[idx + 1] = rgba[1];
-            dst[idx + 2] = rgba[2];
-            dst[idx + 3] = rgba[3];
-            break;
-
-        case PixelFormat::BGRA:
-            dst[idx + 0] = rgba[2];
-            dst[idx + 1] = rgba[1];
-            dst[idx + 2] = rgba[0];
-            dst[idx + 3] = rgba[3];
-            break;
-        }
+        for (int c = 0; c < num_channels; c++) {
+            dst[idx + c] = srcPixel[c];
+		}
     }
 
     void ImageBuffer::GetPixelValue(int x, int y, uint8_t* outPixel) const {
