@@ -76,25 +76,21 @@ namespace Blur {
         int src_width = srcBuffer.GetWidth();
         int src_stride = srcBuffer.GetStride();
 
-        std::shared_ptr<float> tmpBuffer(
-            new float[src_stride * src_height],
-            std::default_delete<float[]>()
-        );
+        std::unique_ptr<float[]> tmpBuffer = std::make_unique<float[]>(src_stride * src_height);
         for (int y = 0; y < src_height; y++) {
-            blurSingleRow(srcBuffer, tmpBuffer, y, kernelSize);
+            blurSingleRow(srcBuffer, tmpBuffer.get(), y, kernelSize);
         }
         for (int x = 0; x < src_width; x++) {
-            blurSingleCol(tmpBuffer, dstBuffer, x, kernelSize);
+            blurSingleCol(tmpBuffer.get(), dstBuffer, x, kernelSize);
         }
     }
 
-    void BoxBlur::blurSingleCol(const std::shared_ptr<float>& tmpBuffer, ImageCore::ImageBuffer& dstBuffer, int col_index, int kernelSize) {
+    void BoxBlur::blurSingleCol(const float* tmpBufferPtr, ImageCore::ImageBuffer& dstBuffer, int col_index, int kernelSize) {
         int height = dstBuffer.GetHeight();
         int width = dstBuffer.GetWidth();
         int stride = dstBuffer.GetStride();
         int numChannels = dstBuffer.GetNumChannels();
         int halfKernel = kernelSize / 2;
-        float* tmpPtr = tmpBuffer.get();
         uint8_t* dstPtr = dstBuffer.GetBufferPtr();
         float accSrcPixels[ImageCore::MAX_NUM_CHANNELS] = { 0.0 };
 
@@ -105,7 +101,7 @@ namespace Blur {
             clampedY = clampCoordinate(kernel_y, height);
             int pixelStartIdx = clampedY * stride + colBaseIndex;
             for (int c = 0; c < numChannels; c++) {
-                accSrcPixels[c] += tmpPtr[pixelStartIdx + c];
+                accSrcPixels[c] += tmpBufferPtr[pixelStartIdx + c];
             }
         }
         int kernelArea = kernelSize * kernelSize;
@@ -123,19 +119,18 @@ namespace Blur {
             int currentIndex = y * stride + colBaseIndex;
 
             for (int c = 0; c < numChannels; c++) {
-                accSrcPixels[c] = accSrcPixels[c] - float(tmpPtr[clampedPrevIndex + c]) + float(tmpPtr[clampedNewIndex + c]);
+                accSrcPixels[c] = accSrcPixels[c] - float(tmpBufferPtr[clampedPrevIndex + c]) + float(tmpBufferPtr[clampedNewIndex + c]);
                 dstPtr[currentIndex + c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
             }
         }
     }
 
-    void BoxBlur::blurSingleRow(const ImageCore::ImageBuffer& srcBuffer, const std::shared_ptr<float>& tmpBuffer, int row_index, int kernelSize) {
+    void BoxBlur::blurSingleRow(const ImageCore::ImageBuffer& srcBuffer, float* tmpBufferPtr, int row_index, int kernelSize) {
         int src_width = srcBuffer.GetWidth();
         int src_stride = srcBuffer.GetStride();
         int numSrcChannels = srcBuffer.GetNumChannels();
         int halfKernel = kernelSize / 2;
         float accSrcPixels[ImageCore::MAX_NUM_CHANNELS] = { 0.0 };
-        float* tmpPtr = tmpBuffer.get();
 
         for (int kernel_x = -halfKernel; kernel_x <= halfKernel; kernel_x++) {
             uint8_t samplePixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
@@ -146,7 +141,7 @@ namespace Blur {
         }
         int rowBaseIndex = row_index * src_stride;
         for (int c = 0; c < numSrcChannels; c++) {
-            tmpPtr[rowBaseIndex + c] = accSrcPixels[c];
+            tmpBufferPtr[rowBaseIndex + c] = accSrcPixels[c];
         }
 
         for (int x = 1; x < src_width; x++) {
@@ -158,7 +153,7 @@ namespace Blur {
             samplePixelWithBoundary(new_x, row_index, srcBuffer, newPixel);
             for (int c = 0; c < numSrcChannels; c++) {
                 accSrcPixels[c] = accSrcPixels[c] - float(prevPixel[c]) + float(newPixel[c]);
-                tmpPtr[rowBaseIndex + (x * numSrcChannels) + c] = accSrcPixels[c];
+                tmpBufferPtr[rowBaseIndex + (x * numSrcChannels) + c] = accSrcPixels[c];
             }
         }
     }
@@ -201,10 +196,7 @@ namespace Blur {
 		int numRowsPerThread = src_height / numThreads_;
 		int numColsPerThread = src_width / numThreads_;
 
-        std::shared_ptr<float> tmpBuffer(
-            new float[src_stride * src_height],
-            std::default_delete<float[]>()
-        );
+        std::unique_ptr<float[]> tmpBuffer = std::make_unique<float[]>(src_stride * src_height);
         std::vector<HRESULT> taskResults(numThreads_);
         std::vector<pthread_cond_t> taskEvents(numThreads_);
         std::vector<pthread_mutex_t> taskMutexes(numThreads_);
@@ -214,7 +206,7 @@ namespace Blur {
         for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
 			rowTaskDataList[threadIdx].pThis = this;
 			rowTaskDataList[threadIdx].srcBuffer = &srcBuffer;
-			rowTaskDataList[threadIdx].tmpBuffer = tmpBuffer;
+			rowTaskDataList[threadIdx].tmpBufferPtr = tmpBuffer.get();
 			rowTaskDataList[threadIdx].start_row_index = threadIdx * numRowsPerThread;
 			rowTaskDataList[threadIdx].end_row_index = (threadIdx == numThreads_ - 1) ? src_height : (threadIdx + 1) * numRowsPerThread;
             rowTaskDataList[threadIdx].kernelSize = kernelSize;
@@ -251,7 +243,7 @@ namespace Blur {
         std::vector<colMultiThreadData> colTaskDataList(numThreads_);
         for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
             colTaskDataList[threadIdx].pThis = this;
-            colTaskDataList[threadIdx].tmpBuffer = tmpBuffer;
+            colTaskDataList[threadIdx].tmpBufferPtr = tmpBuffer.get();
             colTaskDataList[threadIdx].dstBuffer = &dstBuffer;
             colTaskDataList[threadIdx].start_col_index = threadIdx * numColsPerThread;
             colTaskDataList[threadIdx].end_col_index = (threadIdx == numThreads_ - 1) ? src_width : (threadIdx + 1) * numColsPerThread;
@@ -283,7 +275,7 @@ namespace Blur {
     void BoxBlur::rowMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
 		rowMultiThreadData* data = static_cast<rowMultiThreadData*>(pFunctionParam);
         for (int row = data->start_row_index; row < data->end_row_index; ++row) {
-			data->pThis->blurSingleRow(*(data->srcBuffer), data->tmpBuffer, row, data->kernelSize);
+			data->pThis->blurSingleRow(*(data->srcBuffer), data->tmpBufferPtr, row, data->kernelSize);
         }
         
         pthread_mutex_lock(data->pMutex);
@@ -294,7 +286,7 @@ namespace Blur {
     void BoxBlur::colMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
 		colMultiThreadData* data = static_cast<colMultiThreadData*>(pFunctionParam);
         for (int col = data->start_col_index; col < data->end_col_index; col++) {
-			data->pThis->blurSingleCol(data->tmpBuffer, *(data->dstBuffer), col, data->kernelSize);
+			data->pThis->blurSingleCol(data->tmpBufferPtr, *(data->dstBuffer), col, data->kernelSize);
         }
         
         pthread_mutex_lock(data->pMutex);

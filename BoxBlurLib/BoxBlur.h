@@ -42,8 +42,8 @@ namespace Blur {
 
 #if USE_DYNAMIC_PROGRAMMING
 		void fastApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
-		void blurSingleRow(const ImageCore::ImageBuffer& srcBuffer, const std::shared_ptr<float>& tmpBuffer, int row_index, int kernelSize);
-		void blurSingleCol(const std::shared_ptr<float>& tmpBuffer, ImageCore::ImageBuffer& dstBuffer, int col_index, int kernelSize);
+		void blurSingleRow(const ImageCore::ImageBuffer& srcBuffer, float* tmpBufferPtr, int row_index, int kernelSize);
+		void blurSingleCol(const float* tmpBufferPtr, ImageCore::ImageBuffer& dstBuffer, int col_index, int kernelSize);
 #endif
 
 		int clampCoordinate(int coord, int maxCoord) const;
@@ -56,7 +56,7 @@ namespace Blur {
 		struct rowMultiThreadData {
 			BoxBlur* pThis;
 			const ImageCore::ImageBuffer* srcBuffer;
-			std::shared_ptr<float> tmpBuffer;
+			float* tmpBufferPtr;
 			int start_row_index;
 			int end_row_index;
 			int kernelSize;
@@ -65,7 +65,7 @@ namespace Blur {
 		};
 		struct colMultiThreadData {
 			BoxBlur* pThis;
-			std::shared_ptr<float> tmpBuffer;
+			const float* tmpBufferPtr;
 			ImageCore::ImageBuffer* dstBuffer;
 			int start_col_index;
 			int end_col_index;
