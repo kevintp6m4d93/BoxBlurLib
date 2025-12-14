@@ -221,10 +221,11 @@ namespace Blur {
 			rowTaskDataList[threadIdx].start_row_index = threadIdx * numRowsPerThread;
 			rowTaskDataList[threadIdx].end_row_index = (threadIdx == numThreads_ - 1) ? src_height : (threadIdx + 1) * numRowsPerThread;
             rowTaskDataList[threadIdx].kernelSize = kernelSize;
+            rowTaskDataList[threadIdx].pCompleted = &taskCompleted[threadIdx];
+            rowTaskDataList[threadIdx].pMutex = &taskMutexes[threadIdx];
+
 			pthread_cond_init(&taskEvents[threadIdx], nullptr);
 			pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
-			rowTaskDataList[threadIdx].pCompleted = &taskCompleted[threadIdx];
-			rowTaskDataList[threadIdx].pMutex = &taskMutexes[threadIdx];
             
             threadPool_->AssignTask(
                 BoxBlur::rowMultiThreadWraper,
@@ -243,16 +244,10 @@ namespace Blur {
 			pthread_mutex_unlock(&taskMutexes[threadIdx]);
         }
 
-        for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
-            pthread_cond_destroy(&taskEvents[threadIdx]);
-            pthread_mutex_destroy(&taskMutexes[threadIdx]);
-            pthread_cond_init(&taskEvents[threadIdx], nullptr);
-            pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
-            taskCompleted[threadIdx] = 0;
-        }
 
         std::vector<colMultiThreadData> colTaskDataList(numThreads_);
         for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+            taskCompleted[threadIdx] = 0;
             colTaskDataList[threadIdx].pThis = this;
             colTaskDataList[threadIdx].tmpBufferPtr = tmpBuffer.get();
             colTaskDataList[threadIdx].dstBuffer = &dstBuffer;

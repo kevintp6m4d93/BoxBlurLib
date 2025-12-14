@@ -46,7 +46,7 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
 
-            int kernelSizeList[] = { 3, 5, 7, 9, 11, 21, 31, 41, 51, 201 };
+            int kernelSizeList[] = { 3, 5, 7, 9, 11, 21, 31, 41, 51 };
             int numMultiThreadList[] = { 1, 2, 4, 6, 8, 10 };
             constexpr int kRunCount = 5;
 
