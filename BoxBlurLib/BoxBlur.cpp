@@ -5,7 +5,7 @@
 #include <cassert>
 
 namespace Blur {
-    BoxBlur::BoxBlur(PaddingMode paddingMode, int numThreads) : paddingMode_(paddingMode), numThreads_(numThreads) {
+    BoxBlur::BoxBlur(int numThreads, bool forceNaive) : numThreads_(numThreads), forceNaive_(forceNaive) {
 #if USE_MULTI_THREAD
         if (numThreads_ > 0) {
             threadPool_ = std::make_unique<CThreadPool>();
@@ -14,27 +14,40 @@ namespace Blur {
 #endif
     }
 
+    BoxBlur::~BoxBlur() {
+#if USE_MULTI_THREAD
+        if (threadPool_) {
+            threadPool_->Uninitialize();
+        }
+#endif
+    }
+
     void BoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
         // TODO: Null ptr check
         assert(kernelSize % 2 == 1 && kernelSize >= 1);
 		assert(srcBuffer.GetPixelFormat() == dstBuffer.GetPixelFormat());
-        
-#if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
-        if (numThreads_ > 0) {
+#if USE_DYNAMIC_PROGRAMMING
+#if USE_MULTI_THREAD
+        if (forceNaive_) {
+            naiveApply(srcBuffer, dstBuffer, kernelSize);
+        }
+        else if (numThreads_ > 0 && threadPool_) {
             fastApplyMultiThread(srcBuffer, dstBuffer, kernelSize);
         }
         else {
-#if USE_DYNAMIC_PROGRAMMING
             fastApply(srcBuffer, dstBuffer, kernelSize);
-#else
-            naiveApply(srcBuffer, dstBuffer, kernelSize);
-#endif
         }
-#elif USE_DYNAMIC_PROGRAMMING
-        fastApply(srcBuffer, dstBuffer, kernelSize);
+#else
+        if (forceNaive_) {
+            naiveApply(srcBuffer, dstBuffer, kernelSize);
+        }
+        else {
+            fastApply(srcBuffer, dstBuffer, kernelSize);
+        }
+#endif  // USE_MULTI_THREAD
 #else
         naiveApply(srcBuffer, dstBuffer, kernelSize);
-#endif
+#endif  // USE_DYNAMIC_PROGRAMMING
     }
 
     void BoxBlur::naiveApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
@@ -51,21 +64,26 @@ namespace Blur {
         int numSrcChannels = srcBuffer.GetNumChannels();
         float accSrcPixels[ImageCore::MAX_NUM_CHANNELS] = { 0.0 };
         int halfKernel = kernelSize / 2;
+        int validKernelArea = kernelSize * kernelSize;
         for (int kernel_y = -halfKernel; kernel_y <= halfKernel; kernel_y++) {
             for (int kernel_x = -halfKernel; kernel_x <= halfKernel; kernel_x++) {
                 int sample_x = x + kernel_x;
                 int sample_y = y + kernel_y;
                 uint8_t samplePixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
-                samplePixelWithBoundary(sample_x, sample_y, srcBuffer, samplePixel);
+                if (sample_x < 0 || sample_x >= srcBuffer.GetWidth() ||
+					sample_y < 0 || sample_y >= srcBuffer.GetHeight()) {
+                    validKernelArea -= 1;
+                    continue;
+                }
+                srcBuffer.GetPixelValue(sample_x, sample_y, samplePixel);
                 for (int c = 0; c < numSrcChannels; c++) {
                     accSrcPixels[c] += samplePixel[c];
                 }
             }
         }
-        int kernelArea = kernelSize * kernelSize;
         uint8_t avgPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
         for (int c = 0; c < numSrcChannels; c++) {
-            avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
+            avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / validKernelArea);
         }
         dstBuffer.SetPixelValue(x, y, avgPixel);
     }
@@ -93,34 +111,52 @@ namespace Blur {
         int halfKernel = kernelSize / 2;
         uint8_t* dstPtr = dstBuffer.GetBufferPtr();
         float accSrcPixels[ImageCore::MAX_NUM_CHANNELS] = { 0.0 };
+		int numValidLeftCoords = col_index - halfKernel >= 0 ? halfKernel : col_index;
+		int numValidRightCoords = col_index + halfKernel < width ? halfKernel : (width - col_index - 1);
+		int numValidXCoords = numValidLeftCoords + numValidRightCoords + 1;
 
-        int clampedX = clampCoordinate(col_index, width);
-        int colBaseIndex = clampedX * numChannels;
-        int clampedY;
+
+        int colBaseIndex = col_index * numChannels;
         for (int kernel_y = -halfKernel; kernel_y <= halfKernel; kernel_y++) {
-            clampedY = clampCoordinate(kernel_y, height);
-            int pixelStartIdx = clampedY * stride + colBaseIndex;
-            for (int c = 0; c < numChannels; c++) {
-                accSrcPixels[c] += tmpBufferPtr[pixelStartIdx + c];
+            if (kernel_y >= 0 && kernel_y < height) {
+                int pixelStartIdx = kernel_y * stride + colBaseIndex;
+                for (int c = 0; c < numChannels; c++) {
+                    accSrcPixels[c] += tmpBufferPtr[pixelStartIdx + c];
+                }
             }
         }
-        int kernelArea = kernelSize * kernelSize;
+        
+        int numValidTopCoords = 0;
+        int numValidBottomCoords = halfKernel < height ? halfKernel : (height - 1);
+        int numValidYCoords = numValidBottomCoords + 1;
+        int validKernelArea = numValidXCoords * numValidYCoords;
         uint8_t avgPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
         for (int c = 0; c < numChannels; c++) {
-            avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
+            avgPixel[c] = static_cast<uint8_t>(accSrcPixels[c] / validKernelArea);
         }
         dstBuffer.SetPixelValue(col_index, 0, avgPixel);
 
         for (int y = 1; y < height; y++) {
             int prev_y = y - halfKernel - 1;
             int new_y = y + halfKernel;
-            int clampedPrevIndex = clampCoordinate(prev_y, height) * stride + colBaseIndex;
-            int clampedNewIndex = clampCoordinate(new_y, height) * stride + colBaseIndex;
+            int prevBufferIndex = prev_y * stride + colBaseIndex;
+            int newBufferIndex = new_y * stride + colBaseIndex;
             int currentIndex = y * stride + colBaseIndex;
 
+            numValidTopCoords = y - halfKernel >= 0 ? halfKernel : y;
+            numValidBottomCoords = y + halfKernel < height ? halfKernel : (height - y - 1);
+            numValidYCoords = numValidTopCoords + numValidBottomCoords + 1;
+			validKernelArea = numValidXCoords * numValidYCoords;
+            float prevPixelValue = 0.0;
+			float newPixelValue = 0.0;
             for (int c = 0; c < numChannels; c++) {
-                accSrcPixels[c] = accSrcPixels[c] - float(tmpBufferPtr[clampedPrevIndex + c]) + float(tmpBufferPtr[clampedNewIndex + c]);
-                dstPtr[currentIndex + c] = static_cast<uint8_t>(accSrcPixels[c] / kernelArea);
+                if (prev_y >= 0 && prev_y < height)
+					prevPixelValue = float(tmpBufferPtr[prevBufferIndex + c]);
+				if (new_y >= 0 && new_y < height)
+					newPixelValue = float(tmpBufferPtr[newBufferIndex + c]);
+				
+                accSrcPixels[c] = accSrcPixels[c] - prevPixelValue + newPixelValue;
+                dstPtr[currentIndex + c] = static_cast<uint8_t>(accSrcPixels[c] / validKernelArea);
             }
         }
     }
@@ -134,7 +170,8 @@ namespace Blur {
 
         for (int kernel_x = -halfKernel; kernel_x <= halfKernel; kernel_x++) {
             uint8_t samplePixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
-            samplePixelWithBoundary(kernel_x, row_index, srcBuffer, samplePixel);
+			if (kernel_x >= 0 && kernel_x < src_width)
+			    srcBuffer.GetPixelValue(kernel_x, row_index, samplePixel);
             for (int c = 0; c < numSrcChannels; c++) {
                 accSrcPixels[c] += samplePixel[c];
             }
@@ -149,8 +186,10 @@ namespace Blur {
             int new_x = x + halfKernel;
             uint8_t prevPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
             uint8_t newPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
-            samplePixelWithBoundary(prev_x, row_index, srcBuffer, prevPixel);
-            samplePixelWithBoundary(new_x, row_index, srcBuffer, newPixel);
+            if (prev_x >= 0 && prev_x < src_width)
+                srcBuffer.GetPixelValue(prev_x, row_index, prevPixel);
+            if (new_x >= 0 && new_x < src_width)
+                srcBuffer.GetPixelValue(new_x, row_index, newPixel);
             for (int c = 0; c < numSrcChannels; c++) {
                 accSrcPixels[c] = accSrcPixels[c] - float(prevPixel[c]) + float(newPixel[c]);
                 tmpBufferPtr[rowBaseIndex + (x * numSrcChannels) + c] = accSrcPixels[c];
@@ -158,34 +197,6 @@ namespace Blur {
         }
     }
 #endif
-
-    int BoxBlur::clampCoordinate(int coord, int maxCoord) const {
-        int clampedCoordinate = coord;
-        switch (paddingMode_) {	// No need to handle padding
-        case PaddingMode::Replicate:
-            if (coord < 0) clampedCoordinate = 0;
-            if (coord >= maxCoord) clampedCoordinate = maxCoord - 1;
-            break;
-        case PaddingMode::Mirror:
-            if (coord < 0) clampedCoordinate = -coord - 1;
-            if (coord >= maxCoord) clampedCoordinate = 2 * maxCoord - coord - 1;
-            break;
-        }
-        return clampedCoordinate;
-    }
-
-    // Return value: what information should AP know
-    void BoxBlur::samplePixelWithBoundary(int x, int y, const ImageCore::ImageBuffer& buffer, uint8_t* outPixel) {
-        int clampedX = x;
-        int clampedY = y;
-        int width = buffer.GetWidth();
-        int height = buffer.GetHeight();
-        int numChannels = buffer.GetNumChannels();
-        clampedX = clampCoordinate(x, width);
-        clampedY = clampCoordinate(y, height);
-
-        buffer.GetPixelValue(clampedX, clampedY, outPixel);
-    }
 
 #if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
     void BoxBlur::fastApplyMultiThread(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {

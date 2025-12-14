@@ -21,22 +21,17 @@ namespace ImageCore {
 }
 
 namespace Blur {
-	enum class PaddingMode {
-		Zeros,
-		Replicate,
-		Mirror
-	};
-
 	class BoxBlur {
 	public:
-		BoxBlur(PaddingMode paddingMode, int numThreads = 0);
+		BoxBlur(int numThreads = 0, bool forceNaive=false);
+		~BoxBlur();
 		void Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
 	private:
 		int numThreads_;
+		int forceNaive_;
 #if USE_MULTI_THREAD
 		std::unique_ptr<CThreadPool> threadPool_;
 #endif
-		PaddingMode paddingMode_;
 		void naiveApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
 		void blurOnePixel(int x, int y, const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
 
@@ -44,12 +39,7 @@ namespace Blur {
 		void fastApply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
 		void blurSingleRow(const ImageCore::ImageBuffer& srcBuffer, float* tmpBufferPtr, int row_index, int kernelSize);
 		void blurSingleCol(const float* tmpBufferPtr, ImageCore::ImageBuffer& dstBuffer, int col_index, int kernelSize);
-#endif
-
-		int clampCoordinate(int coord, int maxCoord) const;
-		void samplePixelWithBoundary(int x, int y, const ImageCore::ImageBuffer& buffer, uint8_t* outPixel);
-
-#if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
+#if  USE_MULTI_THREAD
 		void fastApplyMultiThread(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize);
 		static void rowMultiThreadWraper(void* pFunctionParam, HRESULT* phr);
 		static void colMultiThreadWraper(void* pFunctionParam, HRESULT* phr);
@@ -73,6 +63,7 @@ namespace Blur {
 			int* pCompleted;
 			pthread_mutex_t* pMutex;
 		};
+#endif
 #endif
 	};
 }
