@@ -39,16 +39,16 @@ namespace BoxBlurUnitTest
     public:
         TEST_METHOD(Test_BoxBlur_Performace)
         {
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/test_image.jpg";
+            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/4k_image.jpg";
             cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
             Assert::IsFalse(src.empty(), L"Failed to load test image");
 
             int width = src.cols;
             int height = src.rows;
 
-            int kernelSizeList[] = { 3, 5, 7, 9, 11, 21, 31, 41, 51 };
+            int kernelSizeList[] = { 3, 5, 7, 9, 11 };
             int numMultiThreadList[] = { 1, 2, 4, 6, 8, 10 };
-            constexpr int kRunCount = 5;
+            constexpr int kRunCount = 50;
 
             ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
@@ -105,7 +105,7 @@ namespace BoxBlurUnitTest
 
         TEST_METHOD(BoxBlur_CompareWithOpenCV)
         {
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/test_image.jpg";
+            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/4k_image.jpg";
             cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
 
             Assert::IsFalse(src.empty(), L"Failed to load test image");
@@ -113,7 +113,7 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
             int numChannel = src.channels();
-            int kernelSize = 51;
+            int kernelSize = 11;
 			ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             Blur::BoxBlur optimizedBoxBlur(8);

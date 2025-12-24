@@ -128,7 +128,7 @@ namespace Blur {
         
         int numValidTopCoords = 0;
         int numValidBottomCoords = halfKernel < height ? halfKernel : (height - 1);
-        int numValidYCoords = numValidBottomCoords + 1;
+        int numValidYCoords = numValidTopCoords + numValidBottomCoords + 1;
         int validKernelArea = numValidXCoords * numValidYCoords;
         uint8_t avgPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
         for (int c = 0; c < numChannels; c++) {
@@ -139,16 +139,17 @@ namespace Blur {
         for (int y = 1; y < height; y++) {
             int prev_y = y - halfKernel - 1;
             int new_y = y + halfKernel;
+            // auucmulate index by stride
             int prevBufferIndex = prev_y * stride + colBaseIndex;
             int newBufferIndex = new_y * stride + colBaseIndex;
             int currentIndex = y * stride + colBaseIndex;
+            float prevPixelValue = 0.0;
+            float newPixelValue = 0.0;
 
             numValidTopCoords = y - halfKernel >= 0 ? halfKernel : y;
             numValidBottomCoords = y + halfKernel < height ? halfKernel : (height - y - 1);
             numValidYCoords = numValidTopCoords + numValidBottomCoords + 1;
 			validKernelArea = numValidXCoords * numValidYCoords;
-            float prevPixelValue = 0.0;
-			float newPixelValue = 0.0;
             for (int c = 0; c < numChannels; c++) {
                 if (prev_y >= 0 && prev_y < height)
 					prevPixelValue = float(tmpBufferPtr[prevBufferIndex + c]);
@@ -162,37 +163,37 @@ namespace Blur {
     }
 
     void BoxBlur::blurSingleRow(const ImageCore::ImageBuffer& srcBuffer, float* tmpBufferPtr, int row_index, int kernelSize) {
-        int src_width = srcBuffer.GetWidth();
-        int src_stride = srcBuffer.GetStride();
-        int numSrcChannels = srcBuffer.GetNumChannels();
+        int width = srcBuffer.GetWidth();
+        int stride = srcBuffer.GetStride();
+        int numChannels = srcBuffer.GetNumChannels();
         int halfKernel = kernelSize / 2;
         float accSrcPixels[ImageCore::MAX_NUM_CHANNELS] = { 0.0 };
 
         for (int kernel_x = -halfKernel; kernel_x <= halfKernel; kernel_x++) {
             uint8_t samplePixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
-			if (kernel_x >= 0 && kernel_x < src_width)
+			if (kernel_x >= 0 && kernel_x < width)
 			    srcBuffer.GetPixelValue(kernel_x, row_index, samplePixel);
-            for (int c = 0; c < numSrcChannels; c++) {
+            for (int c = 0; c < numChannels; c++) {
                 accSrcPixels[c] += samplePixel[c];
             }
         }
-        int rowBaseIndex = row_index * src_stride;
-        for (int c = 0; c < numSrcChannels; c++) {
+        int rowBaseIndex = row_index * stride;
+        for (int c = 0; c < numChannels; c++) {
             tmpBufferPtr[rowBaseIndex + c] = accSrcPixels[c];
         }
 
-        for (int x = 1; x < src_width; x++) {
+        for (int x = 1; x < width; x++) {
             int prev_x = x - halfKernel - 1;
             int new_x = x + halfKernel;
             uint8_t prevPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
             uint8_t newPixel[ImageCore::MAX_NUM_CHANNELS] = { 0 };
-            if (prev_x >= 0 && prev_x < src_width)
+            if (prev_x >= 0 && prev_x < width)
                 srcBuffer.GetPixelValue(prev_x, row_index, prevPixel);
-            if (new_x >= 0 && new_x < src_width)
+            if (new_x >= 0 && new_x < width)
                 srcBuffer.GetPixelValue(new_x, row_index, newPixel);
-            for (int c = 0; c < numSrcChannels; c++) {
+            for (int c = 0; c < numChannels; c++) {
                 accSrcPixels[c] = accSrcPixels[c] - float(prevPixel[c]) + float(newPixel[c]);
-                tmpBufferPtr[rowBaseIndex + (x * numSrcChannels) + c] = accSrcPixels[c];
+                tmpBufferPtr[rowBaseIndex + (x * numChannels) + c] = accSrcPixels[c];
             }
         }
     }
