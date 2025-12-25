@@ -24,6 +24,21 @@
     <ClInclude Include="ThreadTool.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="BoxBlurStrategy.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="NaiveBoxBlur.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="DPBoxBlur.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="MTDPBoxBlur.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="DPBoxBlurHelper.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoxBlur.cpp">
@@ -37,6 +52,18 @@
     </ClCompile>
     <ClCompile Include="IBlur.h">
       <Filter>標頭檔</Filter>
+    </ClCompile>
+    <ClCompile Include="DPBoxBlurHelper.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="MTDPBoxBlur.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="DPBoxBlur.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="NaiveBoxBlur.cpp">
+      <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

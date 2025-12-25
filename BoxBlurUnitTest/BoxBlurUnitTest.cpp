@@ -116,7 +116,7 @@ namespace BoxBlurUnitTest
             int kernelSize = 11;
 			ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            BoxBlur optimizedBoxBlur(0, true);
+            BoxBlur optimizedBoxBlur(8);
             
             auto start = std::chrono::high_resolution_clock::now();
             optimizedBoxBlur.Apply(srcBuffer, optimizedDstBuffer, kernelSize);
