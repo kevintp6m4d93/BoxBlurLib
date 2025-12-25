@@ -4,7 +4,6 @@
 #include "DPBoxBlur.h"
 #include "MTDPBoxBlur.h"
 #include <array>
-#include <cassert>
 
 BoxBlur::BoxBlur(int numThreads, bool forceNaive) {
     if (forceNaive) {
@@ -30,8 +29,5 @@ BoxBlur::~BoxBlur() {
 }
 
 void BoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
-    // TODO: Null ptr check
-    assert(kernelSize % 2 == 1 && kernelSize >= 1);
-	assert(srcBuffer.GetPixelFormat() == dstBuffer.GetPixelFormat());
     boxBlurStrategy->Apply(srcBuffer, dstBuffer, kernelSize);
 }
