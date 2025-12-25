@@ -333,20 +333,24 @@
     <ClInclude Include="BoxBlurStrategy.h" />
     <ClInclude Include="DPBoxBlur.h" />
     <ClInclude Include="DPBoxBlurHelper.h" />
+    <ClInclude Include="GaussianBlur.h" />
     <ClInclude Include="ImageBuffer.h" />
     <ClInclude Include="MTDPBoxBlur.h" />
     <ClInclude Include="NaiveBoxBlur.h" />
+    <ClInclude Include="OpenCVAdapter.h" />
     <ClInclude Include="ThreadTool.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DPBoxBlur.cpp" />
     <ClCompile Include="DPBoxBlurHelper.cpp" />
+    <ClCompile Include="GaussianBlur.cpp" />
     <ClCompile Include="IBlur.cpp" />
     <ClCompile Include="IBlur.h" />
     <ClCompile Include="BoxBlur.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />
     <ClCompile Include="MTDPBoxBlur.cpp" />
     <ClCompile Include="NaiveBoxBlur.cpp" />
+    <ClCompile Include="OpenCVAdapter.cpp" />
     <ClCompile Include="ThreadTool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,14 +1,9 @@
+#pragma once
 #include "ImageBuffer.h"
 #include <string>
 
 struct IBlurSpecificParam {
 	virtual ~IBlurSpecificParam() = default;
-};
-
-class OpenCVAdapter {
-public:
-	static cv::Mat ToMatView(ImageCore::ImageBuffer& buf);
-	static cv::Mat ToMatView(const ImageCore::ImageBuffer& buf);
 };
 
 class IBlur {

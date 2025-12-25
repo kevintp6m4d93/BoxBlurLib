@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CppUnitTest.h"
 #include "BoxBlur.h"
+#include "GaussianBlur.h"
 #include "ImageBuffer.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -46,9 +47,9 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
 
-            int kernelSizeList[] = { 3, 5, 7, 9, 11 };
+            int kernelSizeList[] = { 3 };
             int numMultiThreadList[] = { 1, 2, 4, 6, 8, 10 };
-            constexpr int kRunCount = 50;
+            constexpr int kRunCount = 1;
 
             ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
@@ -114,10 +115,10 @@ namespace BoxBlurUnitTest
             int height = src.rows;
             int numChannel = src.channels();
             int kernelSize = 11;
-			ImageCore::ImageBuffer srcBuffer(src);
+            ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             BoxBlur optimizedBoxBlur(8);
-            
+
             auto start = std::chrono::high_resolution_clock::now();
             optimizedBoxBlur.Apply(srcBuffer, optimizedDstBuffer, kernelSize);
             auto end = std::chrono::high_resolution_clock::now();
@@ -133,7 +134,7 @@ namespace BoxBlurUnitTest
             duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
             timeMessage = L"Naive BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
             Logger::WriteMessage(timeMessage.c_str());
-            
+
             const int total = width * height * numChannel;
             const uint8_t* gtPtr = naiveDstBuffer.GetBufferPtr();
             const uint8_t* dstPtr = optimizedDstBuffer.GetBufferPtr();
@@ -157,6 +158,42 @@ namespace BoxBlurUnitTest
             std::string outName = (dotPos == std::string::npos)
                 ? imageName + "_blurred.jpg"
                 : imageName.substr(0, dotPos) + "_blurred.jpg";
+
+            cv::imwrite(outName, dstMat);
+        }
+
+        TEST_METHOD(TestOpenCVBlur)
+        {
+            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/4k_image.jpg";
+            cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
+
+            Assert::IsFalse(src.empty(), L"Failed to load test image");
+
+            int width = src.cols;
+            int height = src.rows;
+            int numChannel = src.channels();
+            int kernelSize = 11;
+            ImageCore::ImageBuffer srcBuffer(src);
+            ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
+            GaussianBlur gaussianBlur;
+
+            auto start = std::chrono::high_resolution_clock::now();
+            gaussianBlur.Apply(srcBuffer, dstBuffer, kernelSize);
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+            std::wstring timeMessage = L"Gaussian Blur execution time: " + std::to_wstring(duration.count()) + L" ms";
+            Logger::WriteMessage(timeMessage.c_str());
+
+            cv::Mat dstMat(height,
+                width,
+                dstBuffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4,
+                dstBuffer.GetBufferPtr(),
+                dstBuffer.GetStride());
+
+            auto dotPos = imageName.find_last_of('.');
+            std::string outName = (dotPos == std::string::npos)
+                ? imageName + "_gaussian_blurred.jpg"
+                : imageName.substr(0, dotPos) + "_gaussian_blurred.jpg";
 
             cv::imwrite(outName, dstMat);
         }

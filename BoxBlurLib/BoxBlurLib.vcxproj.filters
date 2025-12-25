@@ -39,6 +39,12 @@
     <ClInclude Include="DPBoxBlurHelper.h">
       <Filter>標頭檔</Filter>
     </ClInclude>
+    <ClInclude Include="GaussianBlur.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCVAdapter.h">
+      <Filter>標頭檔</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoxBlur.cpp">
@@ -66,6 +72,12 @@
       <Filter>來源檔案</Filter>
     </ClCompile>
     <ClCompile Include="IBlur.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="GaussianBlur.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenCVAdapter.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
   </ItemGroup>
