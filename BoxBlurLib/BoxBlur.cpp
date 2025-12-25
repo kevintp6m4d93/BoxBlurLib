@@ -28,6 +28,6 @@ BoxBlur::BoxBlur(int numThreads, bool forceNaive) {
 BoxBlur::~BoxBlur() {
 }
 
-void BoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
+void BoxBlur::applyInternal(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, const IBlurSpecificParam *blurSpecificParam) {
     boxBlurStrategy->Apply(srcBuffer, dstBuffer, kernelSize);
 }

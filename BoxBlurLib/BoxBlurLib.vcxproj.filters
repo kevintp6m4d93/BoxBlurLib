@@ -65,5 +65,8 @@
     <ClCompile Include="NaiveBoxBlur.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
+    <ClCompile Include="IBlur.cpp">
+      <Filter>來源檔案</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

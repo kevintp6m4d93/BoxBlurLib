@@ -341,6 +341,7 @@
   <ItemGroup>
     <ClCompile Include="DPBoxBlur.cpp" />
     <ClCompile Include="DPBoxBlurHelper.cpp" />
+    <ClCompile Include="IBlur.cpp" />
     <ClCompile Include="IBlur.h" />
     <ClCompile Include="BoxBlur.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />

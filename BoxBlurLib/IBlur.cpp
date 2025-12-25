@@ -1,13 +1,12 @@
 #include "IBlur.h"
 #include <cassert>
 
-class OpenCVAdapter {
-public:
-	static cv::Mat ToMatView(ImageCore::ImageBuffer& buf);
-	static cv::Mat ToMatView(const ImageCore::ImageBuffer& buf);
-};
+void IBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
+	checkCommonParams(srcBuffer, dstBuffer, kernelSize);
+	applyInternal(srcBuffer, dstBuffer, kernelSize, nullptr);
+}
 
-void IBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, const IBlurSpecificParam& blurSpecificParam) {
+void IBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, const IBlurSpecificParam *blurSpecificParam) {
 	checkCommonParams(srcBuffer, dstBuffer, kernelSize);
 	checkSpecificParams(blurSpecificParam);
 	applyInternal(srcBuffer, dstBuffer, kernelSize, blurSpecificParam);
