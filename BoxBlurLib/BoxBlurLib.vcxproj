@@ -334,6 +334,7 @@
     <ClInclude Include="ThreadTool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="IBlur.h" />
     <ClCompile Include="BoxBlur.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />
     <ClCompile Include="ThreadTool.cpp" />

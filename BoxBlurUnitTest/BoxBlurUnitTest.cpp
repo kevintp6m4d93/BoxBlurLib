@@ -9,7 +9,7 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 long long RunAndMeasure(
-    Blur::BoxBlur& blur,
+    BoxBlur& blur,
     const ImageCore::ImageBuffer& src,
     ImageCore::ImageBuffer& dst,
     int kernelSize)
@@ -53,7 +53,7 @@ namespace BoxBlurUnitTest
             ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
-            Blur::BoxBlur naiveBoxBlur(0, true);
+            BoxBlur naiveBoxBlur(0, true);
 
             for (int kernelSize : kernelSizeList)
             {
@@ -81,7 +81,7 @@ namespace BoxBlurUnitTest
                 // ===== Optimized =====
                 for (int numThreads : numMultiThreadList)
                 {
-                    Blur::BoxBlur optimizedBoxBlur(numThreads);
+                    BoxBlur optimizedBoxBlur(numThreads);
 
                     std::vector<long long> optTimes;
                     for (int i = 0; i < kRunCount; ++i) {
@@ -116,7 +116,7 @@ namespace BoxBlurUnitTest
             int kernelSize = 11;
 			ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            Blur::BoxBlur optimizedBoxBlur(8);
+            BoxBlur optimizedBoxBlur(0, true);
             
             auto start = std::chrono::high_resolution_clock::now();
             optimizedBoxBlur.Apply(srcBuffer, optimizedDstBuffer, kernelSize);
@@ -125,7 +125,7 @@ namespace BoxBlurUnitTest
             std::wstring timeMessage = L"Optimized BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
             Logger::WriteMessage(timeMessage.c_str());
 
-            Blur::BoxBlur naiveBoxBlur(0, true);
+            BoxBlur naiveBoxBlur(0, true);
             ImageCore::ImageBuffer naiveDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             start = std::chrono::high_resolution_clock::now();
             naiveBoxBlur.Apply(srcBuffer, naiveDstBuffer, kernelSize);
