@@ -184,14 +184,9 @@ namespace BoxBlurUnitTest
             BoxBlur boxBlur(8);
             GaussianBlurSpecificParam gaussianBlurSpecificParam{5.0, 5.0};
 
-            auto start = std::chrono::high_resolution_clock::now();
             gaussianBlur.Apply(srcBuffer, gaussianDstBuffer, kernelSize, &gaussianBlurSpecificParam);
-            medianBlur.Apply(srcBuffer, medianDstBuffer, kernelSize, &gaussianBlurSpecificParam);
-            boxBlur.Apply(srcBuffer, boxDstBuffer, kernelSize, &gaussianBlurSpecificParam);
-            auto end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            std::wstring timeMessage = L"Gaussian Blur execution time: " + std::to_wstring(duration.count()) + L" ms";
-            Logger::WriteMessage(timeMessage.c_str());
+            medianBlur.Apply(srcBuffer, medianDstBuffer, kernelSize);
+            boxBlur.Apply(srcBuffer, boxDstBuffer, kernelSize);
 
             cv::Mat gaussianDstMat = OpenCVAdapter::ToMatView(gaussianDstBuffer);
             cv::Mat medianDstMat = OpenCVAdapter::ToMatView(medianDstBuffer);
