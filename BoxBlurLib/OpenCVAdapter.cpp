@@ -6,8 +6,9 @@ cv::Mat OpenCVAdapter::ToMatView(ImageCore::ImageBuffer& buffer) {
 	int width = buffer.GetWidth();
 	int stride = buffer.GetStride();
     uint8_t* data = buffer.GetBufferPtr();
+	auto matType = buffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4;
 
-    cv::Mat matBuffer(height, width, CV_8UC3, data, stride);
+    cv::Mat matBuffer(height, width, matType, data, stride);
 	return matBuffer;
 }
 
@@ -16,8 +17,9 @@ cv::Mat OpenCVAdapter::ToMatView(const ImageCore::ImageBuffer& buffer) {
 	int width = buffer.GetWidth();
 	int stride = buffer.GetStride();
 	const uint8_t* data = buffer.GetBufferPtr();
+	auto matType = buffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4;
 
-	cv::Mat matBuffer(height, width, CV_8UC3, const_cast<uint8_t*>(data), stride);
+	cv::Mat matBuffer(height, width, matType, const_cast<uint8_t*>(data), stride);
 	return matBuffer;
 
 }

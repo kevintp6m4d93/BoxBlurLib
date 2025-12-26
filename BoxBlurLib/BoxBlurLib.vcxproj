@@ -335,6 +335,7 @@
     <ClInclude Include="DPBoxBlurHelper.h" />
     <ClInclude Include="GaussianBlur.h" />
     <ClInclude Include="ImageBuffer.h" />
+    <ClInclude Include="MedianBlur.h" />
     <ClInclude Include="MTDPBoxBlur.h" />
     <ClInclude Include="NaiveBoxBlur.h" />
     <ClInclude Include="OpenCVAdapter.h" />
@@ -348,6 +349,7 @@
     <ClCompile Include="IBlur.h" />
     <ClCompile Include="BoxBlur.cpp" />
     <ClCompile Include="ImageBuffer.cpp" />
+    <ClCompile Include="MedianBlur.cpp" />
     <ClCompile Include="MTDPBoxBlur.cpp" />
     <ClCompile Include="NaiveBoxBlur.cpp" />
     <ClCompile Include="OpenCVAdapter.cpp" />

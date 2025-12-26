@@ -2,6 +2,8 @@
 #include "CppUnitTest.h"
 #include "BoxBlur.h"
 #include "GaussianBlur.h"
+#include "MedianBlur.h"
+#include "OpenCVAdapter.h"
 #include "ImageBuffer.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
@@ -114,7 +116,7 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
             int numChannel = src.channels();
-            int kernelSize = 11;
+            int kernelSize = 3;
             ImageCore::ImageBuffer srcBuffer(src);
             ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             BoxBlur optimizedBoxBlur(8);
@@ -172,30 +174,43 @@ namespace BoxBlurUnitTest
             int width = src.cols;
             int height = src.rows;
             int numChannel = src.channels();
-            int kernelSize = 11;
+            int kernelSize = 31;
             ImageCore::ImageBuffer srcBuffer(src);
-            ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
+            ImageCore::ImageBuffer gaussianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+            ImageCore::ImageBuffer medianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+            ImageCore::ImageBuffer boxDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             GaussianBlur gaussianBlur;
+			MedianBlur medianBlur;
+            BoxBlur boxBlur(8);
+            GaussianBlurSpecificParam gaussianBlurSpecificParam{5.0, 5.0};
 
             auto start = std::chrono::high_resolution_clock::now();
-            gaussianBlur.Apply(srcBuffer, dstBuffer, kernelSize);
+            gaussianBlur.Apply(srcBuffer, gaussianDstBuffer, kernelSize, &gaussianBlurSpecificParam);
+            medianBlur.Apply(srcBuffer, medianDstBuffer, kernelSize, &gaussianBlurSpecificParam);
+            boxBlur.Apply(srcBuffer, boxDstBuffer, kernelSize, &gaussianBlurSpecificParam);
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
             std::wstring timeMessage = L"Gaussian Blur execution time: " + std::to_wstring(duration.count()) + L" ms";
             Logger::WriteMessage(timeMessage.c_str());
 
-            cv::Mat dstMat(height,
-                width,
-                dstBuffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4,
-                dstBuffer.GetBufferPtr(),
-                dstBuffer.GetStride());
+            cv::Mat gaussianDstMat = OpenCVAdapter::ToMatView(gaussianDstBuffer);
+            cv::Mat medianDstMat = OpenCVAdapter::ToMatView(medianDstBuffer);
+            cv::Mat boxDstMat = OpenCVAdapter::ToMatView(boxDstBuffer);
 
             auto dotPos = imageName.find_last_of('.');
-            std::string outName = (dotPos == std::string::npos)
+            std::string gaussianOutName = (dotPos == std::string::npos)
                 ? imageName + "_gaussian_blurred.jpg"
                 : imageName.substr(0, dotPos) + "_gaussian_blurred.jpg";
+            std::string medianOutName = (dotPos == std::string::npos)
+                ? imageName + "_median_blurred.jpg"
+                : imageName.substr(0, dotPos) + "_median_blurred.jpg";
+            std::string boxOutName = (dotPos == std::string::npos)
+                ? imageName + "_box_blurred.jpg"
+                : imageName.substr(0, dotPos) + "_box_blurred.jpg";
 
-            cv::imwrite(outName, dstMat);
+            cv::imwrite(gaussianOutName, gaussianDstMat);
+            cv::imwrite(medianOutName, medianDstMat);
+            cv::imwrite(boxOutName, boxDstMat);
         }
     };
 }

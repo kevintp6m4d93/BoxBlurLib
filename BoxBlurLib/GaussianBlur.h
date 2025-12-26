@@ -2,6 +2,13 @@
 
 #include "IBlur.h"
 
+struct GaussianBlurSpecificParam : public IBlurSpecificParam {
+	GaussianBlurSpecificParam(double sigmaX = 0.0, double sigmaY = 0.0)
+		: sigmaX(sigmaX), sigmaY(sigmaY) {}
+	double sigmaX = 0.0;
+	double sigmaY = 0.0;
+};
+
 class GaussianBlur : public IBlur {
 public:
 	GaussianBlur() = default;
