@@ -21,5 +21,4 @@ cv::Mat OpenCVAdapter::ToMatView(const ImageCore::ImageBuffer& buffer) {
 
 	cv::Mat matBuffer(height, width, matType, const_cast<uint8_t*>(data), stride);
 	return matBuffer;
-
 }

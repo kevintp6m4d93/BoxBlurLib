@@ -13,6 +13,5 @@ void GaussianBlur::applyInternal(const ImageCore::ImageBuffer& srcBuffer, ImageC
 	}
 	const cv::Mat srcMat = OpenCVAdapter::ToMatView(srcBuffer);
 	cv::Mat dstMat = OpenCVAdapter::ToMatView(dstBuffer);
-	printf("%f, %f\n", sigmaX, sigmaY);
 	cv::GaussianBlur(srcMat, dstMat, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
 }
