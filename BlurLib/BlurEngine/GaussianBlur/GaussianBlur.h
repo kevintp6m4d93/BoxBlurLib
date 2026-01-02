@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IBlur.h"
+#include "BlurEngine/IBlur.h"
 
 struct GaussianBlurSpecificParam : public IBlurSpecificParam {
 	GaussianBlurSpecificParam(double sigmaX = 0.0, double sigmaY = 0.0)

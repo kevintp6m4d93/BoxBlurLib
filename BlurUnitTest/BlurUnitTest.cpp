@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "CppUnitTest.h"
-#include "BoxBlur.h"
-#include "GaussianBlur.h"
-#include "MedianBlur.h"
-#include "OpenCVAdapter.h"
-#include "ImageBuffer.h"
+#include "BlurEngine/BoxBlur/BoxBlur.h"
+#include "BlurEngine/GaussianBlur/GaussianBlur.h"
+#include "BlurEngine/MedianBlur/MedianBlur.h"
+#include "Utils/OpenCV/OpenCVAdapter.h"
+#include "Utils/ImageCore/ImageBuffer.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include <chrono>

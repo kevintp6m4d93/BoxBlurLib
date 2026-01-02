@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IBlur.h"
+#include "BlurEngine/IBlur.h"
 
 class MedianBlur : public IBlur {
 public:

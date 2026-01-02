@@ -1,6 +1,6 @@
 #include "MedianBlur.h"
-#include "ImageBuffer.h"
-#include "OpenCVAdapter.h"
+#include "Utils/ImageCore/ImageBuffer.h"
+#include "Utils/OpenCV/OpenCVAdapter.h"
 #include <opencv2/opencv.hpp>
 
 void MedianBlur::applyInternal(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, const IBlurSpecificParam* blurSpecificParam) {

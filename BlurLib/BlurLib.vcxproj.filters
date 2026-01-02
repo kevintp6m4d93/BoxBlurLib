@@ -13,81 +13,102 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="utils">
+    <Filter Include="BlurEngine">
+      <UniqueIdentifier>{4b418660-1192-47d4-be03-acc66d361b90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BlurEngine\BoxBlur">
+      <UniqueIdentifier>{702e87d8-da4e-4875-af00-d08f8615e101}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BlurEngine\GaussianBlur">
+      <UniqueIdentifier>{e9c3093d-010b-4dc1-95c2-290cd629cb56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="BlurEngine\MedianBlur">
+      <UniqueIdentifier>{12bc2312-d25c-4fa8-97e7-eff751d02a3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
       <UniqueIdentifier>{60a518b6-77f1-44cd-a021-69015c76174c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\OpenCV">
+      <UniqueIdentifier>{acff108c-e7a6-4a41-9ce5-fd24ca74eeb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\ImageCore">
+      <UniqueIdentifier>{525f2835-5a8d-48d2-b8cc-2b33ecb5c8b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils\Thread">
+      <UniqueIdentifier>{a9fd7487-0968-4567-9739-8deab651c9e7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BoxBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
-    <ClInclude Include="ImageBuffer.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\BoxBlur\BoxBlurStrategy.h">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadTool.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\BoxBlur\DPBoxBlur.h">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
-    <ClInclude Include="BoxBlurStrategy.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\BoxBlur\DPBoxBlurHelper.h">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
-    <ClInclude Include="NaiveBoxBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\BoxBlur\MTDPBoxBlur.h">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
-    <ClInclude Include="DPBoxBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\BoxBlur\NaiveBoxBlur.h">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
-    <ClInclude Include="MTDPBoxBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\GaussianBlur\GaussianBlur.h">
+      <Filter>BlurEngine\GaussianBlur</Filter>
     </ClInclude>
-    <ClInclude Include="DPBoxBlurHelper.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\MedianBlur\MedianBlur.h">
+      <Filter>BlurEngine\MedianBlur</Filter>
     </ClInclude>
-    <ClInclude Include="GaussianBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="BlurEngine\IBlur.h">
+      <Filter>BlurEngine</Filter>
     </ClInclude>
-    <ClInclude Include="OpenCVAdapter.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="Utils\ImageCore\ImageBuffer.h">
+      <Filter>Utils\ImageCore</Filter>
     </ClInclude>
-    <ClInclude Include="MedianBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClInclude Include="Utils\Thread\ThreadTool.h">
+      <Filter>Utils\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\OpenCV\OpenCVAdapter.h">
+      <Filter>Utils\OpenCV</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BoxBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\BoxBlur\BoxBlur.cpp">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClCompile>
-    <ClCompile Include="ImageBuffer.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\BoxBlur\DPBoxBlur.cpp">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClCompile>
-    <ClCompile Include="ThreadTool.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\BoxBlur\DPBoxBlurHelper.cpp">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClCompile>
-    <ClCompile Include="IBlur.h">
-      <Filter>標頭檔</Filter>
+    <ClCompile Include="BlurEngine\BoxBlur\MTDPBoxBlur.cpp">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClCompile>
-    <ClCompile Include="DPBoxBlurHelper.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\BoxBlur\NaiveBoxBlur.cpp">
+      <Filter>BlurEngine\BoxBlur</Filter>
     </ClCompile>
-    <ClCompile Include="MTDPBoxBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\GaussianBlur\GaussianBlur.cpp">
+      <Filter>BlurEngine\GaussianBlur</Filter>
     </ClCompile>
-    <ClCompile Include="DPBoxBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\MedianBlur\MedianBlur.cpp">
+      <Filter>BlurEngine\MedianBlur</Filter>
     </ClCompile>
-    <ClCompile Include="NaiveBoxBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="BlurEngine\IBlur.cpp">
+      <Filter>BlurEngine</Filter>
     </ClCompile>
-    <ClCompile Include="IBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="Utils\ImageCore\ImageBuffer.cpp">
+      <Filter>Utils\ImageCore</Filter>
     </ClCompile>
-    <ClCompile Include="GaussianBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="Utils\Thread\ThreadTool.cpp">
+      <Filter>Utils\Thread</Filter>
     </ClCompile>
-    <ClCompile Include="OpenCVAdapter.cpp">
-      <Filter>來源檔案</Filter>
-    </ClCompile>
-    <ClCompile Include="MedianBlur.cpp">
-      <Filter>來源檔案</Filter>
+    <ClCompile Include="Utils\OpenCV\OpenCVAdapter.cpp">
+      <Filter>Utils\OpenCV</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

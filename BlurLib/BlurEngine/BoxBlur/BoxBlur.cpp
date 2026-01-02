@@ -1,5 +1,5 @@
 ﻿#include "BoxBlur.h"
-#include "ImageBuffer.h"
+#include "Utils/ImageCore/ImageBuffer.h"
 #include "NaiveBoxBlur.h"
 #include "DPBoxBlur.h"
 #include "MTDPBoxBlur.h"

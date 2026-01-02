@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <memory>
 #include "BoxBlurStrategy.h"
-#include "IBlur.h"
+#include "BlurEngine/IBlur.h"
 
 #ifndef USE_DYNAMIC_PROGRAMMING
 #define USE_DYNAMIC_PROGRAMMING 1

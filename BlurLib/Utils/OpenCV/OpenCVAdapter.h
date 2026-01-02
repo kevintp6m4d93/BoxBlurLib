@@ -1,5 +1,5 @@
 #pragma once
-#include "ImageBuffer.h"
+#include "Utils/ImageCore/ImageBuffer.h"
 namespace cv {
 	class Mat;
 }

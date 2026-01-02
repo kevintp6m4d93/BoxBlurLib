@@ -1,6 +1,6 @@
 #pragma once
 #if USE_DYNAMIC_PROGRAMMING
-#include "ImageBuffer.h"
+#include "Utils/ImageCore/ImageBuffer.h"
 #include "BoxBlurStrategy.h"
 #include "DPBoxBlurHelper.h"
 

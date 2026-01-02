@@ -270,7 +270,7 @@
       <PreprocessorDefinitions>USE_DYNAMIC_PROGRAMMING=0;USE_MULTI_THREAD=0;PTW32_STATIC_LIB;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ext\opencv\build\include;$(SolutionDir)ext\pthread\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext\opencv\build\include;$(SolutionDir)BlurLib;$(SolutionDir)ext\pthread\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -291,7 +291,7 @@
       <PreprocessorDefinitions>USE_DYNAMIC_PROGRAMMING=1;USE_MULTI_THREAD=1;PTW32_STATIC_LIB;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ext\opencv\build\include;$(SolutionDir)ext\pthread\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)ext\opencv\build\include;$(SolutionDir)BlurLib;$(SolutionDir)ext\pthread\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -312,7 +312,7 @@
       <PreprocessorDefinitions>USE_DYNAMIC_PROGRAMMING=1;USE_MULTI_THREAD=0;PTW32_STATIC_LIB;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ext\opencv\build\include;$(SolutionDir)ext\pthread\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)BlurLib;$(SolutionDir)ext\opencv\build\include;$(SolutionDir)ext\pthread\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -330,31 +330,31 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BoxBlur.h" />
-    <ClInclude Include="BoxBlurStrategy.h" />
-    <ClInclude Include="DPBoxBlur.h" />
-    <ClInclude Include="DPBoxBlurHelper.h" />
-    <ClInclude Include="GaussianBlur.h" />
-    <ClInclude Include="ImageBuffer.h" />
-    <ClInclude Include="MedianBlur.h" />
-    <ClInclude Include="MTDPBoxBlur.h" />
-    <ClInclude Include="NaiveBoxBlur.h" />
-    <ClInclude Include="OpenCVAdapter.h" />
-    <ClInclude Include="ThreadTool.h" />
+    <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h" />
+    <ClInclude Include="BlurEngine\BoxBlur\BoxBlurStrategy.h" />
+    <ClInclude Include="BlurEngine\BoxBlur\DPBoxBlur.h" />
+    <ClInclude Include="BlurEngine\BoxBlur\DPBoxBlurHelper.h" />
+    <ClInclude Include="BlurEngine\BoxBlur\MTDPBoxBlur.h" />
+    <ClInclude Include="BlurEngine\BoxBlur\NaiveBoxBlur.h" />
+    <ClInclude Include="BlurEngine\GaussianBlur\GaussianBlur.h" />
+    <ClInclude Include="BlurEngine\IBlur.h" />
+    <ClInclude Include="BlurEngine\MedianBlur\MedianBlur.h" />
+    <ClInclude Include="Utils\ImageCore\ImageBuffer.h" />
+    <ClInclude Include="Utils\OpenCV\OpenCVAdapter.h" />
+    <ClInclude Include="Utils\Thread\ThreadTool.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DPBoxBlur.cpp" />
-    <ClCompile Include="DPBoxBlurHelper.cpp" />
-    <ClCompile Include="GaussianBlur.cpp" />
-    <ClCompile Include="IBlur.cpp" />
-    <ClCompile Include="IBlur.h" />
-    <ClCompile Include="BoxBlur.cpp" />
-    <ClCompile Include="ImageBuffer.cpp" />
-    <ClCompile Include="MedianBlur.cpp" />
-    <ClCompile Include="MTDPBoxBlur.cpp" />
-    <ClCompile Include="NaiveBoxBlur.cpp" />
-    <ClCompile Include="OpenCVAdapter.cpp" />
-    <ClCompile Include="ThreadTool.cpp" />
+    <ClCompile Include="BlurEngine\BoxBlur\BoxBlur.cpp" />
+    <ClCompile Include="BlurEngine\BoxBlur\DPBoxBlur.cpp" />
+    <ClCompile Include="BlurEngine\BoxBlur\DPBoxBlurHelper.cpp" />
+    <ClCompile Include="BlurEngine\BoxBlur\MTDPBoxBlur.cpp" />
+    <ClCompile Include="BlurEngine\BoxBlur\NaiveBoxBlur.cpp" />
+    <ClCompile Include="BlurEngine\GaussianBlur\GaussianBlur.cpp" />
+    <ClCompile Include="BlurEngine\IBlur.cpp" />
+    <ClCompile Include="BlurEngine\MedianBlur\MedianBlur.cpp" />
+    <ClCompile Include="Utils\ImageCore\ImageBuffer.cpp" />
+    <ClCompile Include="Utils\OpenCV\OpenCVAdapter.cpp" />
+    <ClCompile Include="Utils\Thread\ThreadTool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

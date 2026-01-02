@@ -1,11 +1,11 @@
 #pragma once
 #if USE_DYNAMIC_PROGRAMMING && USE_MULTI_THREAD
-#include "ImageBuffer.h"
+#include "Utils/ImageCore/ImageBuffer.h"
 #include "BoxBlurStrategy.h"
 #include "DPBoxBlurHelper.h"
 
 #define HAVE_STRUCT_TIMESPEC
-#include "ThreadTool.h"
+#include "Utils/Thread/ThreadTool.h"
 
 class MTDPBoxBlur : public BoxBlurStrategy {
 public:
