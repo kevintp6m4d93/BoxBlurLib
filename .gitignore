@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+ext/opencv/x64/vc16/lib/
+ext/opencv/x64/vc16/bin/
+ext/opencv/sources/           
+ext/opencv/samples/
+ext/pthread/lib/
+ext/pthread/bin/
+
+!ext/opencv/x64/vc16/include/
+!ext/pthread/include/
