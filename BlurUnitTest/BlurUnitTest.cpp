@@ -42,7 +42,7 @@ namespace BoxBlurUnitTest
     public:
         TEST_METHOD(Test_BoxBlur_Performace)
         {
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/4k_image.jpg";
+            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4k_image.jpg";
             cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
             Assert::IsFalse(src.empty(), L"Failed to load test image");
 
@@ -108,7 +108,7 @@ namespace BoxBlurUnitTest
 
         TEST_METHOD(BoxBlur_CompareWithOpenCV)
         {
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/4k_image.jpg";
+            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4k_image.jpg";
             cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
 
             Assert::IsFalse(src.empty(), L"Failed to load test image");
@@ -166,7 +166,7 @@ namespace BoxBlurUnitTest
 
         TEST_METHOD(TestOpenCVBlur)
         {
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BoxBlurLib/BoxBlurUnitTest/4k_image.jpg";
+            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4k_image.jpg";
             cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
 
             Assert::IsFalse(src.empty(), L"Failed to load test image");

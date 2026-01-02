@@ -64,6 +64,7 @@
     <ProjectGuid>{cd374de1-b3cb-4bf2-bc48-e8ba776aaca0}</ProjectGuid>
     <RootNamespace>BoxBlurLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>BlurLib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

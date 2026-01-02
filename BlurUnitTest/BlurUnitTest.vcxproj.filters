@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BoxBlurUnitTest.cpp">
+    <ClCompile Include="BlurUnitTest.cpp">
       <Filter>來源檔案</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
