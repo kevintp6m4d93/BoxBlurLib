@@ -27,8 +27,13 @@ void MTDPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::Imag
     std::vector<HRESULT> taskResults(numThreads_);
     std::vector<pthread_cond_t> taskEvents(numThreads_);
     std::vector<pthread_mutex_t> taskMutexes(numThreads_);
-    std::vector<int> taskCompleted(numThreads_, 0);
     std::vector<rowMultiThreadData> rowTaskDataList(numThreads_);
+
+    for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
+        pthread_cond_init(&taskEvents[threadIdx], nullptr);
+        pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
+        pthread_mutex_lock(&taskMutexes[threadIdx]);
+    }
 
     for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
         rowTaskDataList[threadIdx].pThis = this;
@@ -37,11 +42,6 @@ void MTDPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::Imag
         rowTaskDataList[threadIdx].start_row_index = threadIdx * numRowsPerThread;
         rowTaskDataList[threadIdx].end_row_index = (threadIdx == numThreads_ - 1) ? src_height : (threadIdx + 1) * numRowsPerThread;
         rowTaskDataList[threadIdx].kernelSize = kernelSize;
-        rowTaskDataList[threadIdx].pCompleted = &taskCompleted[threadIdx];
-        rowTaskDataList[threadIdx].pMutex = &taskMutexes[threadIdx];
-
-        pthread_cond_init(&taskEvents[threadIdx], nullptr);
-        pthread_mutex_init(&taskMutexes[threadIdx], nullptr);
 
         threadPool_->AssignTask(
             MTDPBoxBlur::rowMultiThreadWraper,
@@ -53,25 +53,22 @@ void MTDPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::Imag
     }
 
     for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
-        pthread_mutex_lock(&taskMutexes[threadIdx]);
-        while (!taskCompleted[threadIdx]) {
-            pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
-        }
+        pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
         pthread_mutex_unlock(&taskMutexes[threadIdx]);
     }
 
-
     std::vector<colMultiThreadData> colTaskDataList(numThreads_);
     for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
-        taskCompleted[threadIdx] = 0;
+        pthread_mutex_lock(&taskMutexes[threadIdx]);
+    }
+
+    for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
         colTaskDataList[threadIdx].pThis = this;
         colTaskDataList[threadIdx].tmpBufferPtr = tmpBuffer.get();
         colTaskDataList[threadIdx].dstBuffer = &dstBuffer;
         colTaskDataList[threadIdx].start_col_index = threadIdx * numColsPerThread;
         colTaskDataList[threadIdx].end_col_index = (threadIdx == numThreads_ - 1) ? src_width : (threadIdx + 1) * numColsPerThread;
         colTaskDataList[threadIdx].kernelSize = kernelSize;
-        colTaskDataList[threadIdx].pCompleted = &taskCompleted[threadIdx];
-        colTaskDataList[threadIdx].pMutex = &taskMutexes[threadIdx];
 
         threadPool_->AssignTask(
             MTDPBoxBlur::colMultiThreadWraper,
@@ -83,10 +80,7 @@ void MTDPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::Imag
     }
 
     for (int threadIdx = 0; threadIdx < numThreads_; threadIdx++) {
-        pthread_mutex_lock(&taskMutexes[threadIdx]);
-        while (!taskCompleted[threadIdx]) {
-            pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
-        }
+        pthread_cond_wait(&taskEvents[threadIdx], &taskMutexes[threadIdx]);
         pthread_mutex_unlock(&taskMutexes[threadIdx]);
 
         pthread_cond_destroy(&taskEvents[threadIdx]);
@@ -99,10 +93,6 @@ void MTDPBoxBlur::rowMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
     for (int row = data->start_row_index; row < data->end_row_index; ++row) {
         data->pThis->dpHelper_.blurSingleRow(*(data->srcBuffer), data->tmpBufferPtr, row, data->kernelSize);
     }
-
-    pthread_mutex_lock(data->pMutex);
-    *(data->pCompleted) = 1;
-    pthread_mutex_unlock(data->pMutex);
 }
 
 void MTDPBoxBlur::colMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
@@ -110,9 +100,5 @@ void MTDPBoxBlur::colMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
     for (int col = data->start_col_index; col < data->end_col_index; col++) {
         data->pThis->dpHelper_.blurSingleCol(data->tmpBufferPtr, *(data->dstBuffer), col, data->kernelSize);
     }
-
-    pthread_mutex_lock(data->pMutex);
-    *(data->pCompleted) = 1;
-    pthread_mutex_unlock(data->pMutex);
 }
 #endif
