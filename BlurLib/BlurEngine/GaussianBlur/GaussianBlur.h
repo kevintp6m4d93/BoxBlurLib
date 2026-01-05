@@ -2,9 +2,10 @@
 
 #include "BlurEngine/IBlur.h"
 
-struct GaussianBlurSpecificParam : public IBlurSpecificParam {
-	GaussianBlurSpecificParam(double sigmaX = 0.0, double sigmaY = 0.0)
-		: sigmaX(sigmaX), sigmaY(sigmaY) {}
+struct GaussianBlurParam : public BlurParam {
+	GaussianBlurParam(
+		const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, double sigmaX = 0.0, double sigmaY = 0.0)
+		: BlurParam(srcBuffer, dstBuffer, kernelSize), sigmaX(sigmaX), sigmaY(sigmaY) {}
 	double sigmaX = 0.0;
 	double sigmaY = 0.0;
 };
@@ -13,5 +14,5 @@ class GaussianBlur : public IBlur {
 public:
 	GaussianBlur() = default;
 	~GaussianBlur() = default;
-	void applyInternal(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, const IBlurSpecificParam* blurSpecificParam) override;
+	void applyInternal(const BlurParam* blurParam) override;
 };

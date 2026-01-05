@@ -37,6 +37,9 @@
     <Filter Include="Utils\Thread">
       <UniqueIdentifier>{a9fd7487-0968-4567-9739-8deab651c9e7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\CLBlur">
+      <UniqueIdentifier>{0b28effd-3f0b-45dd-9209-8f773ccf3e7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h">
@@ -75,6 +78,9 @@
     <ClInclude Include="Utils\OpenCV\OpenCVAdapter.h">
       <Filter>Utils\OpenCV</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\CLBlur\CLBlur.h">
+      <Filter>Utils\CLBlur</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BlurEngine\BoxBlur\BoxBlur.cpp">
@@ -109,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="Utils\OpenCV\OpenCVAdapter.cpp">
       <Filter>Utils\OpenCV</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\CLBlur\CLBlur.cpp">
+      <Filter>Utils\CLBlur</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

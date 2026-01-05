@@ -339,6 +339,7 @@
     <ClInclude Include="BlurEngine\GaussianBlur\GaussianBlur.h" />
     <ClInclude Include="BlurEngine\IBlur.h" />
     <ClInclude Include="BlurEngine\MedianBlur\MedianBlur.h" />
+    <ClInclude Include="Utils\CLBlur\CLBlur.h" />
     <ClInclude Include="Utils\ImageCore\ImageBuffer.h" />
     <ClInclude Include="Utils\OpenCV\OpenCVAdapter.h" />
     <ClInclude Include="Utils\Thread\ThreadTool.h" />
@@ -352,6 +353,7 @@
     <ClCompile Include="BlurEngine\GaussianBlur\GaussianBlur.cpp" />
     <ClCompile Include="BlurEngine\IBlur.cpp" />
     <ClCompile Include="BlurEngine\MedianBlur\MedianBlur.cpp" />
+    <ClCompile Include="Utils\CLBlur\CLBlur.cpp" />
     <ClCompile Include="Utils\ImageCore\ImageBuffer.cpp" />
     <ClCompile Include="Utils\OpenCV\OpenCVAdapter.cpp" />
     <ClCompile Include="Utils\Thread\ThreadTool.cpp" />

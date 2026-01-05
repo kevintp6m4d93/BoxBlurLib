@@ -22,7 +22,7 @@ class BoxBlur: public IBlur {
 public:
 	BoxBlur(int numThreads = 0, bool forceNaive=false);
 	~BoxBlur();
-	void applyInternal(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize, const IBlurSpecificParam *blurSpecificParam) override;
+	void applyInternal(const BlurParam* blurParam) override;
 private:
 	std::unique_ptr<BoxBlurStrategy> boxBlurStrategy;
 };

@@ -18,7 +18,8 @@ long long RunAndMeasure(
     int kernelSize)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    blur.Apply(src, dst, kernelSize);
+	BlurParam box_blur_param(src, dst, kernelSize);
+    blur.Apply(&box_blur_param);
     auto end = std::chrono::high_resolution_clock::now();
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
@@ -122,7 +123,8 @@ namespace BoxBlurUnitTest
             BoxBlur optimizedBoxBlur(8);
 
             auto start = std::chrono::high_resolution_clock::now();
-            optimizedBoxBlur.Apply(srcBuffer, optimizedDstBuffer, kernelSize);
+            BlurParam optimized_box_blur_param(srcBuffer, optimizedDstBuffer, kernelSize);
+            optimizedBoxBlur.Apply(&optimized_box_blur_param);
             auto end = std::chrono::high_resolution_clock::now();
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
             std::wstring timeMessage = L"Optimized BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
@@ -131,7 +133,8 @@ namespace BoxBlurUnitTest
             BoxBlur naiveBoxBlur(0, true);
             ImageCore::ImageBuffer naiveDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             start = std::chrono::high_resolution_clock::now();
-            naiveBoxBlur.Apply(srcBuffer, naiveDstBuffer, kernelSize);
+            BlurParam naive_box_blur_param(srcBuffer, naiveDstBuffer, kernelSize);
+            naiveBoxBlur.Apply(&naive_box_blur_param);
             end = std::chrono::high_resolution_clock::now();
             duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
             timeMessage = L"Naive BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
@@ -182,11 +185,13 @@ namespace BoxBlurUnitTest
             GaussianBlur gaussianBlur;
 			MedianBlur medianBlur;
             BoxBlur boxBlur(8);
-            GaussianBlurSpecificParam gaussianBlurSpecificParam{5.0, 5.0};
+            GaussianBlurParam gaussian_blur_param(srcBuffer, gaussianDstBuffer, kernelSize, 5.0, 5.0);
+            BlurParam median_blur_param(srcBuffer, medianDstBuffer, kernelSize);
+            BlurParam box_blur_param(srcBuffer, boxDstBuffer, kernelSize);
 
-            gaussianBlur.Apply(srcBuffer, gaussianDstBuffer, kernelSize, &gaussianBlurSpecificParam);
-            medianBlur.Apply(srcBuffer, medianDstBuffer, kernelSize);
-            boxBlur.Apply(srcBuffer, boxDstBuffer, kernelSize);
+            gaussianBlur.Apply(&gaussian_blur_param);
+            medianBlur.Apply(&median_blur_param);
+            boxBlur.Apply(&box_blur_param);
 
             cv::Mat gaussianDstMat = OpenCVAdapter::ToMatView(gaussianDstBuffer);
             cv::Mat medianDstMat = OpenCVAdapter::ToMatView(medianDstBuffer);
