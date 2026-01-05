@@ -3,6 +3,7 @@
 #include "BlurEngine/BoxBlur/BoxBlur.h"
 #include "BlurEngine/GaussianBlur/GaussianBlur.h"
 #include "BlurEngine/MedianBlur/MedianBlur.h"
+#include "BlurEngine/BlurFactory.h"
 #include "Utils/OpenCV/OpenCVAdapter.h"
 #include "Utils/ImageCore/ImageBuffer.h"
 #include <vector>
@@ -182,16 +183,16 @@ namespace BoxBlurUnitTest
             ImageCore::ImageBuffer gaussianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             ImageCore::ImageBuffer medianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             ImageCore::ImageBuffer boxDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            GaussianBlur gaussianBlur;
-			MedianBlur medianBlur;
-            BoxBlur boxBlur(8);
+			auto gaussianBlur = BlurFactory::Create(BlurFactory::BlurType::Gaussian);
+            auto medianBlur = BlurFactory::Create(BlurFactory::BlurType::Median);
+            auto boxBlur = BlurFactory::Create(BlurFactory::BlurType::Box);
             GaussianBlurParam gaussian_blur_param(srcBuffer, gaussianDstBuffer, kernelSize, 5.0, 5.0);
             BlurParam median_blur_param(srcBuffer, medianDstBuffer, kernelSize);
             BlurParam box_blur_param(srcBuffer, boxDstBuffer, kernelSize);
 
-            gaussianBlur.Apply(&gaussian_blur_param);
-            medianBlur.Apply(&median_blur_param);
-            boxBlur.Apply(&box_blur_param);
+            gaussianBlur->Apply(&gaussian_blur_param);
+            medianBlur->Apply(&median_blur_param);
+            boxBlur->Apply(&box_blur_param);
 
             cv::Mat gaussianDstMat = OpenCVAdapter::ToMatView(gaussianDstBuffer);
             cv::Mat medianDstMat = OpenCVAdapter::ToMatView(medianDstBuffer);
