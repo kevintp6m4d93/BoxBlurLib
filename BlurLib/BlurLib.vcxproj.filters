@@ -40,6 +40,9 @@
     <Filter Include="Utils\CLBlur">
       <UniqueIdentifier>{0b28effd-3f0b-45dd-9209-8f773ccf3e7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\Logger">
+      <UniqueIdentifier>{675638b0-f9aa-44aa-bf84-f14f01200c83}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h">
@@ -84,6 +87,9 @@
     <ClInclude Include="BlurEngine\BlurFactory.h">
       <Filter>BlurEngine\BoxBlur</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\Logger\Logger.h">
+      <Filter>Utils\Logger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BlurEngine\BoxBlur\BoxBlur.cpp">
@@ -124,6 +130,9 @@
     </ClCompile>
     <ClCompile Include="BlurEngine\BlurFactory.cpp">
       <Filter>BlurEngine\BoxBlur</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Logger\Logger.cpp">
+      <Filter>Utils\Logger</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
