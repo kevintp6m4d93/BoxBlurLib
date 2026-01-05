@@ -1,6 +1,6 @@
 #include "BlurFactory.h"
 
-std::unique_ptr<IBlur> Create(BlurFactory::BlurType blurType) {
+std::unique_ptr<IBlur> BlurFactory::Create(BlurFactory::BlurType blurType) {
 	switch (blurType) {
 		case BlurFactory::BlurType::Gaussian:
 			return std::make_unique<GaussianBlur>();

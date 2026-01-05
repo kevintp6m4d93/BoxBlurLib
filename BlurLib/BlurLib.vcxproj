@@ -330,6 +330,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BlurEngine\BlurFactory.h" />
     <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h" />
     <ClInclude Include="BlurEngine\BoxBlur\BoxBlurStrategy.h" />
     <ClInclude Include="BlurEngine\BoxBlur\DPBoxBlur.h" />
@@ -345,6 +346,7 @@
     <ClInclude Include="Utils\Thread\ThreadTool.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BlurEngine\BlurFactory.cpp" />
     <ClCompile Include="BlurEngine\BoxBlur\BoxBlur.cpp" />
     <ClCompile Include="BlurEngine\BoxBlur\DPBoxBlur.cpp" />
     <ClCompile Include="BlurEngine\BoxBlur\DPBoxBlurHelper.cpp" />
