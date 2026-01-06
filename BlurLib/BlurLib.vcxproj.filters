@@ -43,6 +43,9 @@
     <Filter Include="Utils\Logger">
       <UniqueIdentifier>{675638b0-f9aa-44aa-bf84-f14f01200c83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\Error">
+      <UniqueIdentifier>{cff54c66-b9fd-49aa-8463-b739c6cdd313}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h">
@@ -84,11 +87,14 @@
     <ClInclude Include="Utils\CLBlur\CLBlur.h">
       <Filter>Utils\CLBlur</Filter>
     </ClInclude>
-    <ClInclude Include="BlurEngine\BlurFactory.h">
-      <Filter>BlurEngine\BoxBlur</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\Logger\Logger.h">
       <Filter>Utils\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\Error\Error.h">
+      <Filter>Utils\Error</Filter>
+    </ClInclude>
+    <ClInclude Include="BlurEngine\BlurFactory.h">
+      <Filter>BlurEngine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -128,11 +134,14 @@
     <ClCompile Include="Utils\CLBlur\CLBlur.cpp">
       <Filter>Utils\CLBlur</Filter>
     </ClCompile>
-    <ClCompile Include="BlurEngine\BlurFactory.cpp">
-      <Filter>BlurEngine\BoxBlur</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\Logger\Logger.cpp">
       <Filter>Utils\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\Error\Error.cpp">
+      <Filter>Utils\Error</Filter>
+    </ClCompile>
+    <ClCompile Include="BlurEngine\BlurFactory.cpp">
+      <Filter>BlurEngine</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

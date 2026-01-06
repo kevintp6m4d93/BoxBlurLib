@@ -341,6 +341,7 @@
     <ClInclude Include="BlurEngine\IBlur.h" />
     <ClInclude Include="BlurEngine\MedianBlur\MedianBlur.h" />
     <ClInclude Include="Utils\CLBlur\CLBlur.h" />
+    <ClInclude Include="Utils\Error\Error.h" />
     <ClInclude Include="Utils\ImageCore\ImageBuffer.h" />
     <ClInclude Include="Utils\Logger\Logger.h" />
     <ClInclude Include="Utils\OpenCV\OpenCVAdapter.h" />
@@ -357,6 +358,7 @@
     <ClCompile Include="BlurEngine\IBlur.cpp" />
     <ClCompile Include="BlurEngine\MedianBlur\MedianBlur.cpp" />
     <ClCompile Include="Utils\CLBlur\CLBlur.cpp" />
+    <ClCompile Include="Utils\Error\Error.cpp" />
     <ClCompile Include="Utils\ImageCore\ImageBuffer.cpp" />
     <ClCompile Include="Utils\Logger\Logger.cpp" />
     <ClCompile Include="Utils\OpenCV\OpenCVAdapter.cpp" />

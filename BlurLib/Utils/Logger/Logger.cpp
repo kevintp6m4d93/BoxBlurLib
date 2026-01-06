@@ -34,7 +34,7 @@ void Logger::SetLogFile(const std::string& filename) {
 	logFile.open(filename, std::ios::app);
 }
 
-void Logger::Log(LogLevel level, const std::string& message, const std::string& filename, const int line) {
+void Logger::Log(LogLevel level, const std::string& message, const char* filename, const int line) {
 #ifdef DISABLE_LOGGING
 	return;
 #endif

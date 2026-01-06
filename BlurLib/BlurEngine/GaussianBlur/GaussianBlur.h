@@ -15,4 +15,5 @@ public:
 	GaussianBlur() = default;
 	~GaussianBlur() = default;
 	void applyInternal(const BlurParam* blurParam) override;
+	void checkSpecificParams(const BlurParam* blurParam) override;
 };

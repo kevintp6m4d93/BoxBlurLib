@@ -22,7 +22,7 @@ namespace logging {
 		void SetMinLogLevel(LogLevel level) {
 			minLogLevel = level;
 		}
-		void Log(LogLevel level, const std::string& message, const std::string& filename, const int line);
+		void Log(LogLevel level, const std::string& message, const char* filename, const int line);
 		void SetLogFile(const std::string& filename);
 
 	private:

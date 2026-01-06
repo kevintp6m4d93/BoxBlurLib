@@ -1,14 +1,37 @@
 #include "IBlur.h"
+#include "Utils/Error/Error.h"
+#include "Utils/Logger/Logger.h"
 #include <cassert>
 
 void IBlur::Apply(const BlurParam* blurParam) {
-	checkCommonParams(blurParam);
-	checkSpecificParams(blurParam);
-	applyInternal(blurParam);
+	try {
+		checkCommonParams(blurParam);
+		checkSpecificParams(blurParam);
+		applyInternal(blurParam);
+	}
+	catch (const BlurException& e) {
+		LOG_ERROR(e.GetFormattedMessage());
+	}
 }
 
 void IBlur::checkCommonParams(const BlurParam* blurParam) {
-	// TODO: Null ptr check and don't use assert
-	assert(blurParam.kernelSize % 2 == 1 && blurParam.kernelSize >= 1);
-	assert(blurParam.srcBuffer.GetPixelFormat() == blurParam.dstBuffer.GetPixelFormat());
+	if (blurParam == nullptr)
+		THROW_BLUR_EXCEPTION(BlurErrorCode::NullArgument, "BlurParam pointer is null");
+	if (blurParam->srcBuffer.GetBufferPtr() == nullptr)
+		THROW_BLUR_EXCEPTION(BlurErrorCode::NullArgument, "Source buffer points to null");
+	if (blurParam->dstBuffer.GetBufferPtr() == nullptr)
+		THROW_BLUR_EXCEPTION(BlurErrorCode::NullArgument, "Destination buffer points to null");
+	if (blurParam->kernelSize <= 0)
+		THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid kernel size, kernel size should be a positive value");
+	if (blurParam->kernelSize > std::max(blurParam->dstBuffer.GetWidth(), blurParam->dstBuffer.GetHeight()))
+		THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid kernel size, kernel size should less equal than the max side");
+	if (blurParam->kernelSize % 2 == 0)
+		THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid kernel size, kernel size should be an odd value");
+	if (blurParam->srcBuffer.GetWidth() != blurParam->dstBuffer.GetWidth() ||
+		blurParam->srcBuffer.GetHeight() != blurParam->dstBuffer.GetHeight())
+		THROW_BLUR_EXCEPTION(BlurErrorCode::BufferMismatch, "Source and destination buffer size mismatch");
+	if (blurParam->srcBuffer.GetNumChannels() != blurParam->dstBuffer.GetNumChannels())
+		THROW_BLUR_EXCEPTION(BlurErrorCode::BufferMismatch, "Source and destination buffer channel mismatch");
+	if (blurParam->srcBuffer.GetPixelFormat() != blurParam->dstBuffer.GetPixelFormat())
+		THROW_BLUR_EXCEPTION(BlurErrorCode::BufferMismatch, "Source and destination buffer pixel format mismatch");
 }

@@ -1,4 +1,5 @@
 #include "BlurFactory.h"
+#include "Utils/Error/Error.h"
 
 std::unique_ptr<IBlur> BlurFactory::Create(BlurFactory::BlurType blurType) {
 	switch (blurType) {
@@ -9,6 +10,6 @@ std::unique_ptr<IBlur> BlurFactory::Create(BlurFactory::BlurType blurType) {
 		case BlurFactory::BlurType::Box:
 			return std::make_unique<BoxBlur>(8);
 		default:
-			return nullptr;
+			THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Unsupported blur type");
 	}
 }
