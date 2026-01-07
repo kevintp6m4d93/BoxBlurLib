@@ -8,5 +8,6 @@ class OpenCVAdapter {
 public:
 	static cv::Mat ToMatView(ImageCore::ImageBuffer& buffer);
 	static cv::Mat ToMatView(const ImageCore::ImageBuffer& buffer);
+	static ImageCore::ImageBuffer ToImageBufferView(const cv::Mat& mat);
 };
 

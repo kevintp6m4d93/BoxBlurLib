@@ -55,7 +55,7 @@ namespace BoxBlurUnitTest
             int numMultiThreadList[] = { 1, 2, 4, 6, 8, 10 };
             constexpr int kRunCount = 1;
 
-            ImageCore::ImageBuffer srcBuffer(src);
+            ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
             ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
             BoxBlur naiveBoxBlur(0, true);
@@ -119,7 +119,7 @@ namespace BoxBlurUnitTest
             int height = src.rows;
             int numChannel = src.channels();
             int kernelSize = 3;
-            ImageCore::ImageBuffer srcBuffer(src);
+            ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
             ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             BoxBlur optimizedBoxBlur(8);
 
@@ -179,7 +179,7 @@ namespace BoxBlurUnitTest
             int height = src.rows;
             int numChannel = src.channels();
             int kernelSize = 31;
-            ImageCore::ImageBuffer srcBuffer(src);
+            ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
             ImageCore::ImageBuffer gaussianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             ImageCore::ImageBuffer medianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
             ImageCore::ImageBuffer boxDstBuffer(width, height, ImageCore::PixelFormat::BGR);

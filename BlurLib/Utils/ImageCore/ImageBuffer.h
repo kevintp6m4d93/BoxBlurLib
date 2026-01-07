@@ -3,10 +3,6 @@
 #include <memory>
 #include <cstdint>
 
-namespace cv {
-	class Mat;
-}
-
 namespace ImageCore {
 	const int MAX_NUM_CHANNELS = 4;
 
@@ -20,7 +16,7 @@ namespace ImageCore {
 	class ImageBuffer {
 	public:
 		ImageBuffer(int w, int h, PixelFormat pixel_format);
-		ImageBuffer(const cv::Mat& mat);
+		ImageBuffer(int cols, int rows, int channels, int stride, PixelFormat pixel_format, uint8_t* dataPtr);
 
 		int GetWidth() const { return width; }
 		int GetHeight() const { return height; }

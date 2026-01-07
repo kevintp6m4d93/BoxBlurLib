@@ -1,4 +1,3 @@
-#include <opencv2/core.hpp>
 #include <cassert>
 #include "ImageBuffer.h"
 #include "Utils/Error/Error.h"
@@ -12,6 +11,10 @@ namespace ImageCore {
         , stride(0)
         , pixel_format(pixel_format)
     {
+        if (w <= 0 || h <= 0) {
+            THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid image size");
+        }
+
         LOG_DEBUG(
             "Creating ImageBuffer: width=" + std::to_string(w) +
             ", height=" + std::to_string(h) +
@@ -31,10 +34,6 @@ namespace ImageCore {
 			THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Unsupported pixel format");
         }
 
-        if (w <= 0 || h <= 0) {
-            THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid image size");
-        }
-
         stride = width * num_channels;
         try {
             data = std::shared_ptr<uint8_t>(
@@ -47,27 +46,42 @@ namespace ImageCore {
         }
     }
 
-    ImageBuffer::ImageBuffer(const cv::Mat& mat)
-        : width(mat.cols)
-        , height(mat.rows)
-        , num_channels(mat.channels())
-        , stride(mat.step[0])
+    ImageBuffer::ImageBuffer(int w, int h, int channels, int stride, PixelFormat pixel_format, uint8_t *dataPtr)
+        : width(w)
+        , height(h)
+        , num_channels(channels)
+        , stride(stride)
+        , pixel_format(pixel_format)
     {
-        switch (num_channels) {
-        case 3:
-            pixel_format = PixelFormat::BGR;
-            break;
-        case 4:
-            pixel_format = PixelFormat::BGRA;
-            break;
-        default:
-            THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Unsupported pixel format");
+        if (w <= 0 || h <= 0) {
+            THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid image size");
         }
+        if (!dataPtr) {
+            THROW_BLUR_EXCEPTION(BlurErrorCode::NullArgument, "dataPtr is null");
+        }
+		if (stride != w * channels) {
+            THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Stride does not match width * channel number");
+        }
+        switch (channels) {
+            case 3:
+                if (pixel_format != PixelFormat::RGB && pixel_format != PixelFormat::BGR) {
+                    THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Pixel format does not match channel number");
+                }
+				break;
+            case 4:
+                if (pixel_format != PixelFormat::RGBA && pixel_format != PixelFormat::BGRA) {
+                    THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Pixel format does not match channel number");
+				}
+                break;
+			default:
+				THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Unsupported channel number");
+        }
+            
         data = std::shared_ptr<uint8_t>(
-            (uint8_t*)mat.data,
-			[](uint8_t*) {}
-		);
-	}
+            dataPtr,
+            [](uint8_t*) {}
+        );
+    }
 
     void ImageBuffer::SetPixelValue(int x, int y, const uint8_t* srcPixel) {
 		assert(srcPixel != nullptr);
