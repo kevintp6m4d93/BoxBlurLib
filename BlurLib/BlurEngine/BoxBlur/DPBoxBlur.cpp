@@ -1,7 +1,9 @@
 #if USE_DYNAMIC_PROGRAMMING
 #include "DPBoxBlur.h"
+#include "Utils/Logger/Logger.h"
 
 void DPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
+    LOG_INFO("Start executing box blur [DP optimized]");
     int src_height = srcBuffer.GetHeight();
     int src_width = srcBuffer.GetWidth();
     int src_stride = srcBuffer.GetStride();

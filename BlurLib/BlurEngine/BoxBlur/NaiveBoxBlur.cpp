@@ -1,6 +1,8 @@
 #include "NaiveBoxBlur.h"
+#include "Utils/Logger/Logger.h"
 
 void NaiveBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
+    LOG_INFO("Start executing box blur [Naive]");
     int src_height = srcBuffer.GetHeight();
     int src_width = srcBuffer.GetWidth();
     for (int y = 0; y < src_height; y++) {

@@ -2,6 +2,7 @@
 #include "Utils/ImageCore/ImageBuffer.h"
 #include "Utils/Error/Error.h"
 #include "Utils/CLBlur/CLBlur.h"
+#include "Utils/Logger/Logger.h"
 
 void GaussianBlur::applyInternal(const BlurParam* blurParam) {
 	const GaussianBlurParam *gaussianBlurParam = dynamic_cast<const GaussianBlurParam*>(blurParam);
@@ -12,6 +13,7 @@ void GaussianBlur::applyInternal(const BlurParam* blurParam) {
 		gaussianBlurParam->sigmaX,
 		gaussianBlurParam->sigmaY
 	);
+	LOG_INFO("Gaussian blur operation completed successfully");
 }
 
 void GaussianBlur::checkSpecificParams(const BlurParam* blurParam) {

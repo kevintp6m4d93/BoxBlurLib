@@ -2,6 +2,7 @@
 #include <cassert>
 #include "ImageBuffer.h"
 #include "Utils/Error/Error.h"
+#include "Utils/Logger/Logger.h"
 
 namespace ImageCore {
 
@@ -11,6 +12,11 @@ namespace ImageCore {
         , stride(0)
         , pixel_format(pixel_format)
     {
+        LOG_DEBUG(
+            "Creating ImageBuffer: width=" + std::to_string(w) +
+            ", height=" + std::to_string(h) +
+            ", pixel_format=" + std::to_string(static_cast<int>(pixel_format))
+		);
         switch (pixel_format)
         {
         case PixelFormat::RGB:

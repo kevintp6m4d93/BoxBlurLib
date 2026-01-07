@@ -1,5 +1,6 @@
 #if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
 #include "MTDPBoxBlur.h"
+#include "Utils/Logger/Logger.h"
 #include <vector>
 
 MTDPBoxBlur::MTDPBoxBlur(int numThreads) : numThreads_(numThreads) {
@@ -16,6 +17,11 @@ MTDPBoxBlur::~MTDPBoxBlur() {
 }
 
 void MTDPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::ImageBuffer& dstBuffer, int kernelSize) {
+    LOG_INFO(
+        std::string("Start executing box blur [Multi-threaded DP optimized with ")
+        + std::to_string(numThreads_)
+        + " threads]"
+    );
     int src_height = srcBuffer.GetHeight();
     int src_width = srcBuffer.GetWidth();
     int src_stride = srcBuffer.GetStride();
