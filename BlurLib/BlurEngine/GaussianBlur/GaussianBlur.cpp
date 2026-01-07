@@ -6,6 +6,17 @@
 
 void GaussianBlur::applyInternal(const BlurParam* blurParam) {
 	const GaussianBlurParam *gaussianBlurParam = dynamic_cast<const GaussianBlurParam*>(blurParam);
+	LOG_DEBUG(
+		"Gaussian blur parameters: kernelSize=" + std::to_string(gaussianBlurParam->kernelSize) +
+		", sigmaX=" + std::to_string(gaussianBlurParam->sigmaX) +
+		", sigmaY=" + std::to_string(gaussianBlurParam->sigmaY) +
+		", src=(" + std::to_string(blurParam->srcBuffer.GetWidth()) + "x" +
+		std::to_string(blurParam->srcBuffer.GetHeight()) + "x" +
+		std::to_string(blurParam->srcBuffer.GetNumChannels()) + ")" +
+		", dst=(" + std::to_string(blurParam->dstBuffer.GetWidth()) + "x" +
+		std::to_string(blurParam->dstBuffer.GetHeight()) + "x" +
+		std::to_string(blurParam->srcBuffer.GetNumChannels()) + ")"
+	);
 	CLGaussianBlur(
 		gaussianBlurParam->srcBuffer, 
 		gaussianBlurParam->dstBuffer, 

@@ -1,6 +1,7 @@
 #if USE_MULTI_THREAD && USE_DYNAMIC_PROGRAMMING
 #include "MTDPBoxBlur.h"
 #include "Utils/Logger/Logger.h"
+#include "Utils/ScopeTimer/ScopeTimer.h"
 #include <vector>
 
 MTDPBoxBlur::MTDPBoxBlur(int numThreads) : numThreads_(numThreads) {
@@ -96,6 +97,9 @@ void MTDPBoxBlur::Apply(const ImageCore::ImageBuffer& srcBuffer, ImageCore::Imag
 
 void MTDPBoxBlur::rowMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
     rowMultiThreadData* data = static_cast<rowMultiThreadData*>(pFunctionParam);
+    ScopeTimer timer([data](double ms) {
+        LOG_DEBUG("[Execution Time][rowMultiThreadWraper][Row " + std::to_string(data->start_row_index) + "~" + std::to_string(data->end_row_index) + "]: " + std::to_string(ms) + " ms");
+    });
     for (int row = data->start_row_index; row < data->end_row_index; ++row) {
         data->pThis->dpHelper_.blurSingleRow(*(data->srcBuffer), data->tmpBufferPtr, row, data->kernelSize);
     }
@@ -103,6 +107,9 @@ void MTDPBoxBlur::rowMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
 
 void MTDPBoxBlur::colMultiThreadWraper(void* pFunctionParam, HRESULT* phr) {
     colMultiThreadData* data = static_cast<colMultiThreadData*>(pFunctionParam);
+    ScopeTimer timer([data](double ms) {
+        LOG_DEBUG("[Execution Time][colMultiThreadWraper][Col " + std::to_string(data->start_col_index) + "~" + std::to_string(data->end_col_index) + "]: " + std::to_string(ms) + " ms");
+    });
     for (int col = data->start_col_index; col < data->end_col_index; col++) {
         data->pThis->dpHelper_.blurSingleCol(data->tmpBufferPtr, *(data->dstBuffer), col, data->kernelSize);
     }

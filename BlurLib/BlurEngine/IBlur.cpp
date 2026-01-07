@@ -33,8 +33,6 @@ void IBlur::checkCommonParams(const BlurParam* blurParam) {
 		THROW_BLUR_EXCEPTION(BlurErrorCode::NullArgument, "Destination buffer points to null");
 	if (blurParam->kernelSize <= 0)
 		THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid kernel size, kernel size should be a positive value");
-	if (blurParam->kernelSize > std::max(blurParam->dstBuffer.GetWidth(), blurParam->dstBuffer.GetHeight()))
-		THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid kernel size, kernel size should less equal than the max side");
 	if (blurParam->kernelSize % 2 == 0)
 		THROW_BLUR_EXCEPTION(BlurErrorCode::BadParams, "Invalid kernel size, kernel size should be an odd value");
 	if (blurParam->srcBuffer.GetWidth() != blurParam->dstBuffer.GetWidth() ||
@@ -44,4 +42,6 @@ void IBlur::checkCommonParams(const BlurParam* blurParam) {
 		THROW_BLUR_EXCEPTION(BlurErrorCode::BufferMismatch, "Source and destination buffer channel mismatch");
 	if (blurParam->srcBuffer.GetPixelFormat() != blurParam->dstBuffer.GetPixelFormat())
 		THROW_BLUR_EXCEPTION(BlurErrorCode::BufferMismatch, "Source and destination buffer pixel format mismatch");
+	if (blurParam->kernelSize > std::max(blurParam->dstBuffer.GetWidth(), blurParam->dstBuffer.GetHeight()))
+		LOG_WARNING("The kernel size is greater than the image max side. This may cause extremely slow performance and unexpected results.");
 }

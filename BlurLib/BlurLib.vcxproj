@@ -345,6 +345,7 @@
     <ClInclude Include="Utils\ImageCore\ImageBuffer.h" />
     <ClInclude Include="Utils\Logger\Logger.h" />
     <ClInclude Include="Utils\OpenCV\OpenCVAdapter.h" />
+    <ClInclude Include="Utils\ScopeTimer\ScopeTimer.h" />
     <ClInclude Include="Utils\Thread\ThreadTool.h" />
   </ItemGroup>
   <ItemGroup>
@@ -362,6 +363,7 @@
     <ClCompile Include="Utils\ImageCore\ImageBuffer.cpp" />
     <ClCompile Include="Utils\Logger\Logger.cpp" />
     <ClCompile Include="Utils\OpenCV\OpenCVAdapter.cpp" />
+    <ClCompile Include="Utils\ScopeTimer\ScopeTimer.cpp" />
     <ClCompile Include="Utils\Thread\ThreadTool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

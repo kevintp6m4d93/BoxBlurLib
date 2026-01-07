@@ -1,6 +1,7 @@
 ﻿#include "BoxBlur.h"
 #include "Utils/ImageCore/ImageBuffer.h"
 #include "Utils/Logger/Logger.h"
+#include "Utils/ScopeTimer/ScopeTimer.h"
 #include "NaiveBoxBlur.h"
 #include "DPBoxBlur.h"
 #include "MTDPBoxBlur.h"
@@ -32,6 +33,18 @@ BoxBlur::~BoxBlur() {
 }
 
 void BoxBlur::applyInternal(const BlurParam* blurParam) {
+    ScopeTimer timer([](double ms) {
+        LOG_DEBUG("[Execution Time][BoxBlur]: " + std::to_string(ms) + " ms"); 
+    });
+    LOG_DEBUG(
+        "Box blur parameters: kernelSize=" + std::to_string(blurParam->kernelSize) +
+        ", src=(" + std::to_string(blurParam->srcBuffer.GetWidth()) + "x" +
+        std::to_string(blurParam->srcBuffer.GetHeight()) + "x" +
+        std::to_string(blurParam->srcBuffer.GetNumChannels()) + ")" +
+        ", dst=(" + std::to_string(blurParam->dstBuffer.GetWidth()) + "x" +
+        std::to_string(blurParam->dstBuffer.GetHeight()) + "x" +
+        std::to_string(blurParam->srcBuffer.GetNumChannels()) + ")"
+    );
     boxBlurStrategy->Apply(blurParam->srcBuffer, blurParam->dstBuffer, blurParam->kernelSize);
     LOG_INFO("Box blur operation completed successfully");
 }

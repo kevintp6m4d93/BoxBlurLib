@@ -46,6 +46,9 @@
     <Filter Include="Utils\Error">
       <UniqueIdentifier>{cff54c66-b9fd-49aa-8463-b739c6cdd313}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utils\ScopeTimer">
+      <UniqueIdentifier>{ace43486-21d5-4270-ab61-c2f33f993a80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlurEngine\BoxBlur\BoxBlur.h">
@@ -96,6 +99,9 @@
     <ClInclude Include="BlurEngine\BlurFactory.h">
       <Filter>BlurEngine</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\ScopeTimer\ScopeTimer.h">
+      <Filter>Utils\ScopeTimer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BlurEngine\BoxBlur\BoxBlur.cpp">
@@ -142,6 +148,9 @@
     </ClCompile>
     <ClCompile Include="BlurEngine\BlurFactory.cpp">
       <Filter>BlurEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\ScopeTimer\ScopeTimer.cpp">
+      <Filter>Utils\ScopeTimer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

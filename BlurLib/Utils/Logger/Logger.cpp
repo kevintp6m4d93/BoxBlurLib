@@ -1,5 +1,6 @@
 #include "Logger.h"
 #include <ctime>
+#include <chrono>
 #include <sstream>
 #include <iomanip>
 using logging::Logger;
@@ -17,13 +18,8 @@ std::string Logger::levelToString(LogLevel level) const {
 
 std::string Logger::getCurrentTimestamp() const {
 	auto now = std::chrono::system_clock::now();
-	auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-		now.time_since_epoch()
-	).count();
-	
-	std::ostringstream oss;
-	oss << ms;
-	return oss.str();
+	std::string formatted_time = std::format("{0:%F_%T}", now);
+	return formatted_time;
 }
 
 void Logger::SetLogFile(const std::string& filename) {
