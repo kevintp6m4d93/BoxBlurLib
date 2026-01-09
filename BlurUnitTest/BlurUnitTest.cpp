@@ -7,6 +7,7 @@
 #include "Utils/OpenCV/OpenCVAdapter.h"
 #include "Utils/ImageCore/ImageBuffer.h"
 #include "Utils/Logger/Logger.h"
+#include "Utils/Error/Error.h"
 #include <vector>
 #include <opencv2/opencv.hpp>
 #include <chrono>
@@ -45,179 +46,209 @@ namespace BoxBlurUnitTest
     public:
         TEST_METHOD(Test_BoxBlur_Performace)
         {
-			//logging::Logger::GetInstance().SetMinLogLevel(logging::LogLevel::ERR);
-            logging::Logger::GetInstance().SetLogFile("C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/log.log");
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4096_image.jpg";
-            cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
-            Assert::IsFalse(src.empty(), L"Failed to load test image");
+            try {
+			    //logging::Logger::GetInstance().SetMinLogLevel(logging::LogLevel::ERR);
+                logging::Logger::GetInstance().SetLogFile("C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/log.log");
+                std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4096_image.jpg";
+                cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
+                Assert::IsFalse(src.empty(), L"Failed to load test image");
 
 
-            int width = src.cols;
-            int height = src.rows;
+                int width = src.cols;
+                int height = src.rows;
 
-            int kernelSizeList[] = { 3 };
-            int numMultiThreadList[] = { 1, 2, 4, 6, 8, 10 };
-            constexpr int kRunCount = 1;
+                int kernelSizeList[] = { 3 };
+                int numMultiThreadList[] = { 1, 2, 4, 6, 8, 10 };
+                constexpr int kRunCount = 1;
 
-            ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
-            ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
+                ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
+                ImageCore::ImageBuffer dstBuffer(width, height, ImageCore::PixelFormat::BGR);
 
-            BoxBlur naiveBoxBlur(0, true);
+                BoxBlur naiveBoxBlur(0, true);
 
-            for (int kernelSize : kernelSizeList)
-            {
+                for (int kernelSize : kernelSizeList)
                 {
-                    std::ostringstream oss;
-                    oss << "\nStart testing performance of kernel size = " << kernelSize;
-                    Logger::WriteMessage(oss.str().c_str());
-                }
+                    {
+                        std::ostringstream oss;
+                        oss << "\nStart testing performance of kernel size = " << kernelSize;
+                        Logger::WriteMessage(oss.str().c_str());
+                    }
 
-                // ===== Naive =====
-                std::vector<long long> naiveTimes;
-                for (int i = 0; i < kRunCount; ++i) {
-                    naiveTimes.push_back(
-                        RunAndMeasure(naiveBoxBlur, srcBuffer, dstBuffer, kernelSize)
-                    );
-                }
-
-                long long naiveAvg = TrimmedMean(naiveTimes);
-                {
-                    std::wstring msg = L"Naive BoxBlur execution time (trimmed mean, 5 runs): "
-                        + std::to_wstring(naiveAvg) + L" ms";
-                    Logger::WriteMessage(msg.c_str());
-                }
-
-                // ===== Optimized =====
-                for (int numThreads : numMultiThreadList)
-                {
-                    BoxBlur optimizedBoxBlur(numThreads);
-
-                    std::vector<long long> optTimes;
+                    // ===== Naive =====
+                    std::vector<long long> naiveTimes;
                     for (int i = 0; i < kRunCount; ++i) {
-                        optTimes.push_back(
-                            RunAndMeasure(optimizedBoxBlur, srcBuffer, dstBuffer, kernelSize)
+                        naiveTimes.push_back(
+                            RunAndMeasure(naiveBoxBlur, srcBuffer, dstBuffer, kernelSize)
                         );
                     }
 
-                    long long optAvg = TrimmedMean(optTimes);
-                    std::wstring msg =
-                        L"Optimized BoxBlur execution time "
-                        L"(kernel size " + std::to_wstring(kernelSize) +
-                        L", threads " + std::to_wstring(numThreads) +
-                        L", trimmed mean, 5 runs): " +
-                        std::to_wstring(optAvg) + L" ms";
+                    long long naiveAvg = TrimmedMean(naiveTimes);
+                    {
+                        std::wstring msg = L"Naive BoxBlur execution time (trimmed mean, 5 runs): "
+                            + std::to_wstring(naiveAvg) + L" ms";
+                        Logger::WriteMessage(msg.c_str());
+                    }
 
-                    Logger::WriteMessage(msg.c_str());
+                    // ===== Optimized =====
+                    for (int numThreads : numMultiThreadList)
+                    {
+                        BoxBlur optimizedBoxBlur(numThreads);
+
+                        std::vector<long long> optTimes;
+                        for (int i = 0; i < kRunCount; ++i) {
+                            optTimes.push_back(
+                                RunAndMeasure(optimizedBoxBlur, srcBuffer, dstBuffer, kernelSize)
+                            );
+                        }
+
+                        long long optAvg = TrimmedMean(optTimes);
+                        std::wstring msg =
+                            L"Optimized BoxBlur execution time "
+                            L"(kernel size " + std::to_wstring(kernelSize) +
+                            L", threads " + std::to_wstring(numThreads) +
+                            L", trimmed mean, 5 runs): " +
+                            std::to_wstring(optAvg) + L" ms";
+
+                        Logger::WriteMessage(msg.c_str());
+                    }
                 }
+            }
+            catch (const BlurException& e) {
+                LOG_ERROR(e.GetFormattedMessage());
+                std::wstring wmsg(
+                    e.GetFormattedMessage().begin(),
+                    e.GetFormattedMessage().end()
+                );
+                Assert::Fail(wmsg.c_str());
             }
         }
 
-        TEST_METHOD(BoxBlur_CompareWithOpenCV)
+        TEST_METHOD(BoxBlur_CompareWithNaive)
         {
-            //logging::Logger::GetInstance().SetMinLogLevel(logging::LogLevel::ERR);
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4096_image.jpg";
-            cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
+            try {
+                //logging::Logger::GetInstance().SetMinLogLevel(logging::LogLevel::ERR);
+                std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4096_image.jpg";
+                cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
 
-            Assert::IsFalse(src.empty(), L"Failed to load test image");
+                Assert::IsFalse(src.empty(), L"Failed to load test image");
 
-            int width = src.cols;
-            int height = src.rows;
-            int numChannel = src.channels();
-            int kernelSize = 3;
-            ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
-            ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            BoxBlur optimizedBoxBlur(8);
+                int width = src.cols;
+                int height = src.rows;
+                int numChannel = src.channels();
+                int kernelSize = 3;
+                ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
+                ImageCore::ImageBuffer optimizedDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+                BoxBlur optimizedBoxBlur(8);
 
-            auto start = std::chrono::high_resolution_clock::now();
-            BlurParam optimized_box_blur_param(srcBuffer, optimizedDstBuffer, kernelSize);
-            optimizedBoxBlur.Apply(&optimized_box_blur_param);
-            auto end = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            std::wstring timeMessage = L"Optimized BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
-            Logger::WriteMessage(timeMessage.c_str());
+                auto start = std::chrono::high_resolution_clock::now();
+                BlurParam optimized_box_blur_param(srcBuffer, optimizedDstBuffer, kernelSize);
+                optimizedBoxBlur.Apply(&optimized_box_blur_param);
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+                std::wstring timeMessage = L"Optimized BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
+                Logger::WriteMessage(timeMessage.c_str());
 
-            BoxBlur naiveBoxBlur(0, true);
-            ImageCore::ImageBuffer naiveDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            start = std::chrono::high_resolution_clock::now();
-            BlurParam naive_box_blur_param(srcBuffer, naiveDstBuffer, kernelSize);
-            naiveBoxBlur.Apply(&naive_box_blur_param);
-            end = std::chrono::high_resolution_clock::now();
-            duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            timeMessage = L"Naive BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
-            Logger::WriteMessage(timeMessage.c_str());
+                BoxBlur naiveBoxBlur(0, true);
+                ImageCore::ImageBuffer naiveDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+                start = std::chrono::high_resolution_clock::now();
+                BlurParam naive_box_blur_param(srcBuffer, naiveDstBuffer, kernelSize);
+                naiveBoxBlur.Apply(&naive_box_blur_param);
+                end = std::chrono::high_resolution_clock::now();
+                duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+                timeMessage = L"Naive BoxBlur execution time: " + std::to_wstring(duration.count()) + L" ms";
+                Logger::WriteMessage(timeMessage.c_str());
 
-            const int total = width * height * numChannel;
-            const uint8_t* gtPtr = naiveDstBuffer.GetBufferPtr();
-            const uint8_t* dstPtr = optimizedDstBuffer.GetBufferPtr();
+                const int total = width * height * numChannel;
+                const uint8_t* gtPtr = naiveDstBuffer.GetBufferPtr();
+                const uint8_t* dstPtr = optimizedDstBuffer.GetBufferPtr();
 
-            for (int i = 0; i < total; ++i)
-            {
-                int diff = std::abs(int(gtPtr[i]) - int(dstPtr[i]));
-                Assert::IsTrue(
-                    diff <= 1,
-                    (L"Pixel difference too large at index " + std::to_wstring(i)).c_str()
-                );
+                for (int i = 0; i < total; ++i)
+                {
+                    int diff = std::abs(int(gtPtr[i]) - int(dstPtr[i]));
+                    Assert::IsTrue(
+                        diff <= 1,
+                        (L"Pixel difference too large at index " + std::to_wstring(i)).c_str()
+                    );
+                }
+
+                cv::Mat dstMat(height,
+                    width,
+                    optimizedDstBuffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4,
+                    optimizedDstBuffer.GetBufferPtr(),
+                    optimizedDstBuffer.GetStride());
+
+                auto dotPos = imageName.find_last_of('.');
+                std::string outName = (dotPos == std::string::npos)
+                    ? imageName + "_blurred.jpg"
+                    : imageName.substr(0, dotPos) + "_blurred.jpg";
+
+                cv::imwrite(outName, dstMat);
             }
-
-            cv::Mat dstMat(height,
-                width,
-                optimizedDstBuffer.GetNumChannels() == 3 ? CV_8UC3 : CV_8UC4,
-                optimizedDstBuffer.GetBufferPtr(),
-                optimizedDstBuffer.GetStride());
-
-            auto dotPos = imageName.find_last_of('.');
-            std::string outName = (dotPos == std::string::npos)
-                ? imageName + "_blurred.jpg"
-                : imageName.substr(0, dotPos) + "_blurred.jpg";
-
-            cv::imwrite(outName, dstMat);
+            catch (const BlurException& e) {
+                LOG_ERROR(e.GetFormattedMessage());
+                std::wstring wmsg(
+                    e.GetFormattedMessage().begin(),
+                    e.GetFormattedMessage().end()
+                );
+                Assert::Fail(wmsg.c_str());
+            }
         }
 
         TEST_METHOD(TestOpenCVBlur)
         {
-            //logging::Logger::GetInstance().SetMinLogLevel(logging::LogLevel::ERR);
-            std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4096_image.jpg";
-            cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
+            try {
+                //logging::Logger::GetInstance().SetMinLogLevel(logging::LogLevel::ERR);
+                std::string imageName = "C:/Users/KevinYK_Chen/Desktop/CPP_repo/BlurLib/BlurUnitTest/4096_image.jpg";
+                cv::Mat src = cv::imread(imageName, cv::IMREAD_COLOR);
 
-            Assert::IsFalse(src.empty(), L"Failed to load test image");
+                Assert::IsFalse(src.empty(), L"Failed to load test image");
 
-            int width = src.cols;
-            int height = src.rows;
-            int numChannel = src.channels();
-            int kernelSize = 31;
-            ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
-            ImageCore::ImageBuffer gaussianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            ImageCore::ImageBuffer medianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-            ImageCore::ImageBuffer boxDstBuffer(width, height, ImageCore::PixelFormat::BGR);
-			auto gaussianBlur = BlurFactory::Create(BlurFactory::BlurType::Gaussian);
-            auto medianBlur = BlurFactory::Create(BlurFactory::BlurType::Median);
-            auto boxBlur = BlurFactory::Create(BlurFactory::BlurType::Box);
-            GaussianBlurParam gaussian_blur_param(srcBuffer, gaussianDstBuffer, kernelSize, 5.0, 5.0);
-            BlurParam median_blur_param(srcBuffer, medianDstBuffer, kernelSize);
-            BlurParam box_blur_param(srcBuffer, boxDstBuffer, kernelSize);
+                int width = src.cols;
+                int height = src.rows;
+                int numChannel = src.channels();
+                int kernelSize = 31;
+                ImageCore::ImageBuffer srcBuffer = OpenCVAdapter::ToImageBufferView(src);
+                ImageCore::ImageBuffer gaussianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+                ImageCore::ImageBuffer medianDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+                ImageCore::ImageBuffer boxDstBuffer(width, height, ImageCore::PixelFormat::BGR);
+                auto gaussianBlur = BlurFactory::Create(BlurFactory::BlurType::Gaussian);
+                auto medianBlur = BlurFactory::Create(BlurFactory::BlurType::Median);
+                auto boxBlur = BlurFactory::Create(BlurFactory::BlurType::Box);
+                GaussianBlurParam gaussian_blur_param(srcBuffer, gaussianDstBuffer, kernelSize, 5.0, 5.0);
+                BlurParam median_blur_param(srcBuffer, medianDstBuffer, kernelSize);
+                BlurParam box_blur_param(srcBuffer, boxDstBuffer, kernelSize);
 
-            gaussianBlur->Apply(&gaussian_blur_param);
-            medianBlur->Apply(&median_blur_param);
-            boxBlur->Apply(&box_blur_param);
+                gaussianBlur->Apply(&gaussian_blur_param);
+                medianBlur->Apply(&median_blur_param);
+                boxBlur->Apply(&box_blur_param);
 
-            cv::Mat gaussianDstMat = OpenCVAdapter::ToMatView(gaussianDstBuffer);
-            cv::Mat medianDstMat = OpenCVAdapter::ToMatView(medianDstBuffer);
-            cv::Mat boxDstMat = OpenCVAdapter::ToMatView(boxDstBuffer);
+                cv::Mat gaussianDstMat = OpenCVAdapter::ToMatView(gaussianDstBuffer);
+                cv::Mat medianDstMat = OpenCVAdapter::ToMatView(medianDstBuffer);
+                cv::Mat boxDstMat = OpenCVAdapter::ToMatView(boxDstBuffer);
 
-            auto dotPos = imageName.find_last_of('.');
-            std::string gaussianOutName = (dotPos == std::string::npos)
-                ? imageName + "_gaussian_blurred.jpg"
-                : imageName.substr(0, dotPos) + "_gaussian_blurred.jpg";
-            std::string medianOutName = (dotPos == std::string::npos)
-                ? imageName + "_median_blurred.jpg"
-                : imageName.substr(0, dotPos) + "_median_blurred.jpg";
-            std::string boxOutName = (dotPos == std::string::npos)
-                ? imageName + "_box_blurred.jpg"
-                : imageName.substr(0, dotPos) + "_box_blurred.jpg";
+                auto dotPos = imageName.find_last_of('.');
+                std::string gaussianOutName = (dotPos == std::string::npos)
+                    ? imageName + "_gaussian_blurred.jpg"
+                    : imageName.substr(0, dotPos) + "_gaussian_blurred.jpg";
+                std::string medianOutName = (dotPos == std::string::npos)
+                    ? imageName + "_median_blurred.jpg"
+                    : imageName.substr(0, dotPos) + "_median_blurred.jpg";
+                std::string boxOutName = (dotPos == std::string::npos)
+                    ? imageName + "_box_blurred.jpg"
+                    : imageName.substr(0, dotPos) + "_box_blurred.jpg";
 
-            cv::imwrite(gaussianOutName, gaussianDstMat);
-            cv::imwrite(medianOutName, medianDstMat);
-            cv::imwrite(boxOutName, boxDstMat);
+                cv::imwrite(gaussianOutName, gaussianDstMat);
+                cv::imwrite(medianOutName, medianDstMat);
+                cv::imwrite(boxOutName, boxDstMat);
+            }
+            catch (const BlurException& e) {
+                LOG_ERROR(e.GetFormattedMessage());
+                std::wstring wmsg(
+                    e.GetFormattedMessage().begin(),
+                    e.GetFormattedMessage().end()
+                );
+                Assert::Fail(wmsg.c_str());
+            }
         }
     };
 }

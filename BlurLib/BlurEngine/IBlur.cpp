@@ -9,17 +9,11 @@ void IBlur::Apply(const BlurParam* blurParam) {
 		checkSpecificParams(blurParam);
 		applyInternal(blurParam);
 	}
-	catch (const BlurException& e) {
-		LOG_ERROR(e.GetFormattedMessage());
-		throw;
-	}
-	catch (const std::exception& e) {;
-		LOG_ERROR(e.what());
+	catch (const std::exception& e) {
 		THROW_BLUR_EXCEPTION(BlurErrorCode::Unexpected, e.what());
 	}
 	catch (...) {
 		std::string msg = "Unknown exception caught during blur operation";
-		LOG_ERROR(msg);
 		THROW_BLUR_EXCEPTION(BlurErrorCode::Unexpected, msg);
 	}
 }
