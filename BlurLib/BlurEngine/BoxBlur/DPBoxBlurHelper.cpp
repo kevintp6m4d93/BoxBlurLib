@@ -15,9 +15,10 @@ void DPBoxBlurHelper::blurSingleCol(const float* tmpBufferPtr, ImageCore::ImageB
 
 
     int colBaseIndex = col_index * numChannels;
+    int pixelStartIdx = colBaseIndex;
     for (int kernel_y = -halfKernel; kernel_y <= halfKernel; kernel_y++) {
         if (kernel_y >= 0 && kernel_y < height) {
-            int pixelStartIdx = kernel_y * stride + colBaseIndex;
+			pixelStartIdx = (kernel_y == 0) ? pixelStartIdx : pixelStartIdx + stride;
             for (int c = 0; c < numChannels; c++) {
                 accSrcPixels[c] += tmpBufferPtr[pixelStartIdx + c];
             }
@@ -34,13 +35,18 @@ void DPBoxBlurHelper::blurSingleCol(const float* tmpBufferPtr, ImageCore::ImageB
     }
     dstBuffer.SetPixelValue(col_index, 0, avgPixel);
 
+	int prev_y = -halfKernel - 1;
+	int new_y = halfKernel;
+	int prevBufferIndex = prev_y * stride + colBaseIndex;
+	int newBufferIndex = new_y * stride + colBaseIndex;
+	int currentIndex = colBaseIndex;
+
     for (int y = 1; y < height; y++) {
-        int prev_y = y - halfKernel - 1;
-        int new_y = y + halfKernel;
-        // auucmulate index by stride
-        int prevBufferIndex = prev_y * stride + colBaseIndex;
-        int newBufferIndex = new_y * stride + colBaseIndex;
-        int currentIndex = y * stride + colBaseIndex;
+        prev_y++;
+        new_y++;
+        prevBufferIndex += stride;
+        newBufferIndex += stride;
+        currentIndex += stride;
         float prevPixelValue = 0.0;
         float newPixelValue = 0.0;
 
